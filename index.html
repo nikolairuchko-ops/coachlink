@@ -23,30 +23,26 @@
 <section id="authView" class="card auth">
   <div class="eyebrow">ЕДИНАЯ СИСТЕМА ТРЕНИРОВОК</div>
   <h1>Добро пожаловать</h1>
-  <p class="muted">Выбери свой тип аккаунта и войди.</p>
-  <div class="tabs" role="group" aria-label="Тип аккаунта">
-    <button id="athleteRoleTab" class="active" type="button" onclick="selectLoginRole('athlete')">Спортсмен</button>
-    <button id="coachRoleTab" type="button" onclick="selectLoginRole('coach')">Тренер</button>
-    <button id="adminRoleTab" type="button" onclick="selectLoginRole('admin')">Администратор</button>
+  <p class="muted">Спортсмену достаточно указать имя — пароль и почта не нужны.</p>
+  <form id="registerForm" onsubmit="event.preventDefault();startAthleteSession()">
+    <div class="field"><label for="registerName">Твоё имя</label><input id="registerName" type="text" maxlength="100" autocomplete="given-name" required placeholder="Например, Алексей"></div>
+    <button class="btn green" type="submit">Продолжить</button>
+  </form>
+  <button class="btn secondary" type="button" onclick="showStaffLogin()">Вход для тренера и администратора</button>
+  <div id="staffLogin" class="hidden">
+    <div class="tabs" role="group" aria-label="Тип аккаунта">
+      <button id="coachRoleTab" class="active" type="button" onclick="selectLoginRole('coach')">Тренер</button>
+      <button id="adminRoleTab" type="button" onclick="selectLoginRole('admin')">Администратор</button>
+    </div>
+    <form id="loginForm" onsubmit="event.preventDefault();signIn()">
+      <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
+      <button class="btn" type="submit">Войти</button>
+    </form>
+    <button class="btn secondary" type="button" onclick="resetLoginPassword()">Забыли пароль? Отправить ссылку для сброса</button>
   </div>
-  <form id="loginForm" onsubmit="event.preventDefault();signIn()">
-    <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="email" required></div>
-    <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
-    <button class="btn" type="submit">Войти</button>
-  </form>
-  <button class="btn secondary" type="button" onclick="resetLoginPassword()">Забыли пароль? Отправить ссылку для сброса</button>
-  <button class="btn secondary" type="button" onclick="showRegisterForm()">Создать аккаунт спортсмена</button>
-  <form id="registerForm" class="hidden" onsubmit="event.preventDefault();signUp()">
-    <h2>Регистрация спортсмена</h2>
-    <div class="field"><label for="registerName">Имя и фамилия</label><input id="registerName" type="text" maxlength="100" autocomplete="name" required></div>
-    <div class="field"><label for="registerEmail">Электронная почта</label><input id="registerEmail" type="email" autocomplete="email" required></div>
-    <div class="field"><label for="registerPassword">Пароль (не менее 8 символов)</label><input id="registerPassword" type="password" minlength="8" autocomplete="new-password" required></div>
-    <div class="field"><label for="registerPasswordConfirm">Повтори пароль</label><input id="registerPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required></div>
-    <button class="btn green" type="submit">Зарегистрироваться</button>
-    <button class="btn secondary" type="button" onclick="showLoginForm()">Назад ко входу</button>
-  </form>
   <p id="authMessage" class="small" aria-live="polite"></p>
-  <p class="small">Самостоятельная регистрация открыта для спортсменов. Аккаунты тренеров и администраторов создаются администратором.</p>
+  <p class="small">Сессия спортсмена сохраняется в этом браузере. Для доступа с другого устройства понадобится отдельная настройка входа.</p>
 </section>
 
 <section id="loadingView" class="card hidden"><h2>Проверяем доступ…</h2><p class="muted">Получаем профиль и роль из Supabase.</p></section>
@@ -136,17 +132,47 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
-function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser)}
+function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);if(view==='authView'){$('staffLogin').classList.add('hidden');$('registerForm').classList.remove('hidden')}}
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 function selectLoginRole(role){
-  if(!['coach','athlete','admin'].includes(role))return;
+  if(!['coach','admin'].includes(role))return;
   selectedLoginRole=role;
-  $('athleteRoleTab').classList.toggle('active',role==='athlete');
   $('coachRoleTab').classList.toggle('active',role==='coach');
   $('adminRoleTab').classList.toggle('active',role==='admin');
   setMessage('');
 }
 window.selectLoginRole=selectLoginRole;
+
+function showStaffLogin(){
+  $('staffLogin').classList.remove('hidden');
+  $('registerForm').classList.add('hidden');
+  setMessage('');
+}
+window.showStaffLogin=showStaffLogin;
+
+function showLoginForm(){
+  $('staffLogin').classList.add('hidden');
+  $('registerForm').classList.remove('hidden');
+  setMessage('');
+}
+window.showLoginForm=showLoginForm;
+
+async function startAthleteSession(){
+  const display_name=$('registerName').value.trim().replace(/\\s+/g,' ');
+  if(!display_name){setMessage('Введи своё имя.',true);return}
+  if(display_name.length>100){setMessage('Имя слишком длинное.',true);return}
+  setMessage('Создаём профиль спортсмена…');
+  const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name}}});
+  if(error){
+    const message=/anonymous sign-ins are disabled|anonymous provider is disabled/i.test(error.message)
+      ? 'В Supabase ещё не включён анонимный вход. Администратору нужно включить Anonymous Sign-Ins в Authentication → Sign In / Providers.'
+      : 'Не удалось создать профиль: '+error.message;
+    setMessage(message,true);return;
+  }
+  currentUser=data.user||data.session?.user||null;
+  if(currentUser) await loadProfile();
+}
+window.startAthleteSession=startAthleteSession;
 
 async function signIn(){
   const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
@@ -156,46 +182,6 @@ async function signIn(){
   if(error){enforceLoginRole=false;setMessage(error.message,true);return}
 }
 window.signIn=signIn;
-
-function showRegisterForm(){
-  selectLoginRole('athlete');
-  document.querySelector('#authView .tabs').classList.add('hidden');
-  $('loginForm').classList.add('hidden');
-  $('registerForm').classList.remove('hidden');
-  document.querySelector('#authView > button[onclick="resetLoginPassword()"]').classList.add('hidden');
-  document.querySelector('#authView > button[onclick="showRegisterForm()"]').classList.add('hidden');
-  setMessage('');
-}
-window.showRegisterForm=showRegisterForm;
-function showLoginForm(){
-  document.querySelector('#authView .tabs').classList.remove('hidden');
-  $('registerForm').classList.add('hidden');
-  $('loginForm').classList.remove('hidden');
-  document.querySelector('#authView > button[onclick="resetLoginPassword()"]').classList.remove('hidden');
-  document.querySelector('#authView > button[onclick="showRegisterForm()"]').classList.remove('hidden');
-  setMessage('');
-}
-window.showLoginForm=showLoginForm;
-async function signUp(){
-  const display_name=$('registerName').value.trim();
-  const email=$('registerEmail').value.trim().toLowerCase();
-  const password=$('registerPassword').value;
-  const confirm=$('registerPasswordConfirm').value;
-  if(!display_name||!email||password.length<8){setMessage('Заполни имя, корректную почту и пароль не короче 8 символов.',true);return}
-  if(password!==confirm){setMessage('Пароли не совпадают.',true);return}
-  setMessage('Создаём аккаунт спортсмена…');
-  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name}}});
-  if(error){setMessage(error.message,true);return}
-  $('registerForm').reset();
-  if(data.session){
-    setMessage('Аккаунт создан. Выполняем вход…');
-  }else{
-    setMessage('Регистрация почти завершена. Проверь почту '+email+' и подтверди адрес, затем войди.');
-    showLoginForm();
-    $('loginEmail').value=email;
-  }
-}
-window.signUp=signUp;
 
 async function resetLoginPassword(){
   const email=$('loginEmail').value.trim();
@@ -242,7 +228,7 @@ async function loadProfile(){
     show('pendingView');return;
   }
   const roleLabels={admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'};
-  $('userLabel').textContent=(profile.display_name||currentUser.email)+' · '+roleLabels[profile.role];
+  $('userLabel').textContent=(profile.display_name||currentUser.email||'Спортсмен')+' · '+roleLabels[profile.role];
   location.hash=profile.role==='admin'?'#/admin':profile.role==='coach'?'#/coach':'#/athlete';
   await renderDashboard();
 }
