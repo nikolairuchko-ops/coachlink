@@ -17,36 +17,15 @@
 <div class="wrap">
 <header class="top">
   <div class="brand">COACH <span>LINK</span></div>
-  <div id="userbar" class="userbar hidden"><span id="userLabel" class="small"></span><button class="btn secondary" onclick="signOut()">Выйти из сессии</button></div>
+  <div id="userbar" class="userbar"><span id="userLabel" class="small">Гостевой доступ</span><div class="tabs" role="group" aria-label="Режим сайта"><button id="athleteModeBtn" type="button" onclick="switchMode('athlete')">Спортсмен</button><button id="coachModeBtn" type="button" onclick="switchMode('coach')">Тренер</button></div></div>
 </header>
 
-<section id="authView" class="card auth">
-  <div class="eyebrow">ЕДИНАЯ СИСТЕМА ТРЕНИРОВОК</div>
-  <h1>Добро пожаловать</h1>
-  <p class="muted">Спортсмену достаточно указать имя — пароль и почта не нужны.</p>
-  <form id="registerForm" onsubmit="event.preventDefault();startAthleteSession()">
-    <div class="field"><label for="registerName">Твоё имя</label><input id="registerName" type="text" maxlength="100" autocomplete="given-name" required placeholder="Например, Алексей"></div>
-    <button class="btn green" type="submit">Продолжить</button>
-  </form>
-  <button class="btn secondary" type="button" onclick="showStaffLogin()">Вход для тренера и администратора</button>
-  <div id="staffLogin" class="hidden">
-    <div class="tabs" role="group" aria-label="Тип аккаунта">
-      <button id="coachRoleTab" class="active" type="button" onclick="selectLoginRole('coach')">Тренер</button>
-      <button id="adminRoleTab" type="button" onclick="selectLoginRole('admin')">Администратор</button>
-    </div>
-    <form id="loginForm" onsubmit="event.preventDefault();signIn()">
-      <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="username" required></div>
-      <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
-      <button class="btn" type="submit">Войти</button>
-    </form>
-    <button class="btn secondary" type="button" onclick="resetLoginPassword()">Забыли пароль? Отправить ссылку для сброса</button>
-  </div>
-  <p id="authMessage" class="small" aria-live="polite"></p>
-  <p class="small">Сессия спортсмена сохраняется в этом браузере. Для доступа с другого устройства понадобится отдельная настройка входа.</p>
-</section>
+<section id="authView" class="card auth hidden"><h1>Подключаем гостевой доступ…</h1><p id="authMessage" class="small" aria-live="polite"></p></section>
 
-<section id="loadingView" class="card hidden"><h2>Проверяем доступ…</h2><p class="muted">Получаем профиль и роль из Supabase.</p></section>
-<section id="pendingView" class="card hidden"><h2>Профиль ещё не готов</h2><p id="pendingMessage" class="muted">Не удалось загрузить профиль пользователя.</p><div class="actions"><button class="btn secondary" onclick="loadProfile()">Повторить</button><button class="btn secondary" onclick="signOut()">Выйти</button></div></section>
+
+
+<section id="loadingView" class="card hidden"><h2>Подключаемся…</h2><p class="muted">Открываем COACH LINK.</p></section>
+<section id="pendingView" class="card hidden"><h2>Не удалось подключиться</h2><p id="pendingMessage" class="muted">Проверьте подключение и обновите страницу.</p><div class="actions"><button class="btn secondary" onclick="location.reload()">Повторить</button></div></section>
 
 <main id="coachView" class="hidden">
   <section class="hero"><div class="eyebrow">ПАНЕЛЬ ТРЕНЕРА</div><h1>Управление командой</h1><p>Назначай тренировки, фиксируй навыки и публикуй новости.</p></section>
@@ -132,157 +111,82 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
-function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);if(view==='authView'){$('staffLogin').classList.add('hidden');$('registerForm').classList.remove('hidden')}}
+function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);}
+
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
-function selectLoginRole(role){
-  if(!['coach','admin'].includes(role))return;
-  selectedLoginRole=role;
-  $('coachRoleTab').classList.toggle('active',role==='coach');
-  $('adminRoleTab').classList.toggle('active',role==='admin');
-  setMessage('');
+async function switchMode(role){
+  if(!currentUser||!['coach','athlete'].includes(role))return;
+  if(profile?.role===role){await renderDashboard();return}
+  const {data,error}=await supabase.from('profiles').update({role}).eq('id',currentUser.id).select('id,display_name,role,invite_code').single();
+  if(error){toast('Не удалось переключить режим: '+error.message);return}
+  profile=data;
+  await renderDashboard();
 }
-window.selectLoginRole=selectLoginRole;
-
-function showStaffLogin(){
-  $('staffLogin').classList.remove('hidden');
-  $('registerForm').classList.add('hidden');
-  setMessage('');
-}
-window.showStaffLogin=showStaffLogin;
-
-function showLoginForm(){
-  $('staffLogin').classList.add('hidden');
-  $('registerForm').classList.remove('hidden');
-  setMessage('');
-}
-window.showLoginForm=showLoginForm;
-
-async function startAthleteSession(){
-  const display_name=$('registerName').value.trim().replace(/\\s+/g,' ');
-  if(!display_name){setMessage('Введи своё имя.',true);return}
-  if(display_name.length>100){setMessage('Имя слишком длинное.',true);return}
-  setMessage('Создаём профиль спортсмена…');
-  const {data,error}=await supabase.auth.signInAnonymously({options:{data:{display_name}}});
-  if(error){
-    const message=/anonymous sign-ins are disabled|anonymous provider is disabled/i.test(error.message)
-      ? 'В Supabase ещё не включён анонимный вход. Администратору нужно включить Anonymous Sign-Ins в Authentication → Sign In / Providers.'
-      : 'Не удалось создать профиль: '+error.message;
-    setMessage(message,true);return;
-  }
-  currentUser=data.user||data.session?.user||null;
-  if(currentUser) await loadProfile();
-}
-window.startAthleteSession=startAthleteSession;
-
-async function signIn(){
-  const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
-  setMessage('Выполняется вход…');
-  enforceLoginRole=true;
-  const {error}=await supabase.auth.signInWithPassword({email,password});
-  if(error){enforceLoginRole=false;setMessage(error.message,true);return}
-}
-window.signIn=signIn;
-
-async function resetLoginPassword(){
-  const email=$('loginEmail').value.trim();
-  if(!email){setMessage('Сначала укажи электронную почту аккаунта.');$('loginEmail').focus();return}
-  setMessage('Отправляем ссылку для сброса пароля…');
-  const redirectTo=window.location.origin+window.location.pathname;
-  const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo});
-  if(error){setMessage('Не удалось отправить письмо: '+error.message,true);return}
-  setMessage('Если аккаунт существует, на эту почту отправлена ссылка для сброса пароля. Проверь также папку «Спам».');
-}
-window.resetLoginPassword=resetLoginPassword;
+window.switchMode=switchMode;
 
 async function signOut(){
-  const {error}=await supabase.auth.signOut();
-  if(error){toast('Не удалось завершить сессию: '+error.message);return}
-  currentUser=null;profile=null;athletes=[];
-  location.hash='#/login';show('authView');$('userbar').classList.add('hidden');
+  toast('Для входа не нужны аккаунт и пароль. Обнови страницу, чтобы начать новую гостевую сессию.');
 }
 window.signOut=signOut;
 
 async function loadProfile(){
-  if(!currentUser){show('authView');return}
+  if(!currentUser){show('pendingView');$('pendingMessage').textContent='Нет гостевой сессии. Обновите страницу.';return}
   show('loadingView');
   let result=await supabase.from('profiles').select('id,display_name,role,invite_code').eq('id',currentUser.id).maybeSingle();
   if(result.error||!result.data){
-    await new Promise(resolve=>setTimeout(resolve,800));
+    await new Promise(resolve=>setTimeout(resolve,500));
     result=await supabase.from('profiles').select('id,display_name,role,invite_code').eq('id',currentUser.id).maybeSingle();
   }
   if(result.error||!result.data){
-    $('pendingMessage').textContent=result.error?.message||'Профиль ещё не создан. Обнови страницу или обратись к администратору.';
+    $('pendingMessage').textContent=result.error?.message||'Профиль ещё создаётся. Обновите страницу.';
     show('pendingView');return;
   }
   profile=result.data;
-  if(enforceLoginRole && profile.role!==selectedLoginRole){
-    enforceLoginRole=false;
-    await supabase.auth.signOut();
-    currentUser=null;profile=null;
-    show('authView');
-    setMessage('У этого аккаунта нет роли «'+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[selectedLoginRole])+'». Обратись к администратору.',true);
-    return;
+  if(!['coach','athlete'].includes(profile.role)){
+    const role=profile.role==='admin'?'coach':'athlete';
+    const changed=await supabase.from('profiles').update({role}).eq('id',currentUser.id).select('id,display_name,role,invite_code').single();
+    if(changed.error){$('pendingMessage').textContent=changed.error.message;show('pendingView');return}
+    profile=changed.data;
   }
-  enforceLoginRole=false;
-  if(!['coach','athlete','admin'].includes(profile.role)){
-    $('pendingMessage').textContent='Для аккаунта не назначена допустимая роль. Обратись к администратору.';
-    show('pendingView');return;
-  }
-  const roleLabels={admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'};
-  $('userLabel').textContent=(profile.display_name||currentUser.email||'Спортсмен')+' · '+roleLabels[profile.role];
-  location.hash=profile.role==='admin'?'#/admin':profile.role==='coach'?'#/coach':'#/athlete';
+  $('userLabel').textContent='Общий гостевой доступ';
   await renderDashboard();
 }
 async function guardRoute(){
-  if(!currentUser){show('authView');$('userbar').classList.add('hidden');if(location.hash!=='#/login')history.replaceState(null,'','#/login');return}
+  if(!currentUser){show('loadingView');return}
   if(!profile){await loadProfile();return}
-  const expected=profile.role==='admin'?'#/admin':profile.role==='coach'?'#/coach':'#/athlete';
+  const expected=profile.role==='coach'?'#/coach':'#/athlete';
   if(location.hash!==expected)history.replaceState(null,'',expected);
-  show(profile.role==='admin'?'adminView':profile.role==='coach'?'coachView':'athleteView');
+  show(profile.role==='coach'?'coachView':'athleteView');
 }
 window.addEventListener('hashchange',guardRoute);
 
 async function renderDashboard(){
-  if(profile.role==='admin')await loadAdminUsers();
-  else if(profile.role==='coach')await loadCoachDashboard();
-  else await loadAthleteDashboard();
-  show(profile.role==='admin'?'adminView':profile.role==='coach'?'coachView':'athleteView');
+  if(!profile)return;
+  const coach=profile.role==='coach';
+  $('coachModeBtn').classList.toggle('active',coach);
+  $('athleteModeBtn').classList.toggle('active',!coach);
+  location.hash=coach?'#/coach':'#/athlete';
+  if(coach)await loadCoachDashboard();else await loadAthleteDashboard();
+  show(coach?'coachView':'athleteView');
 }
-function roleLabel(role){return ({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'})[role]||role}
-async function loadAdminUsers(){
-  if(!profile||profile.role!=='admin')return;
-  $('adminUsers').innerHTML='<div class="empty">Загружаем список…</div>';
-  const {data,error}=await supabase.functions.invoke('admin-users',{body:{action:'list'}});
-  if(error||data?.error){$('adminUsers').innerHTML='<div class="empty error">Не удалось загрузить список: '+esc(data?.error||error?.message||'Ошибка функции')+'. Проверь, что серверная функция admin-users развёрнута.</div>';return}
-  const users=data.users||[];
-  $('adminUsers').innerHTML=users.map(u=>'<div class="item"><div><strong>'+esc(u.display_name||'Без имени')+'</strong><span class="small">'+esc(u.email||'')+'</span><span class="small">'+esc(roleLabel(u.role))+' · '+(u.email_confirmed?'Почта подтверждена':'Почта не подтверждена')+'</span></div><span class="tag">'+esc(u.role)+'</span></div>').join('')||'<div class="empty">Пользователей пока нет.</div>';
-}
-async function createManagedUser(){
-  const display_name=$('managedName').value.trim(),email=$('managedEmail').value.trim(),password=$('managedPassword').value,role=$('managedRole').value;
-  $('adminMessage').textContent='Создаём аккаунт…';$('adminMessage').className='small';
-  const {data,error}=await supabase.functions.invoke('admin-users',{body:{action:'create',display_name,email,password,role}});
-  if(error||data?.error){$('adminMessage').textContent=data?.error||error?.message||'Не удалось создать аккаунт.';$('adminMessage').className='small error';return}
-  $('adminCreateForm').reset();
-  $('adminMessage').textContent='Аккаунт '+data.user.email+' успешно создан. Роль: '+roleLabel(data.user.role)+'.';$('adminMessage').className='small success';
-  await loadAdminUsers();
-}
-window.loadAdminUsers=loadAdminUsers;window.createManagedUser=createManagedUser;
+
 async function loadCoachDashboard(){
-  const {data:links,error:linkError}=await supabase.from('coach_athletes').select('athlete_id').eq('coach_id',currentUser.id);
-  if(linkError){toast('Ошибка загрузки команды: '+linkError.message);return}
-  const ids=(links||[]).map(x=>x.athlete_id);
-  athletes=[];
-  if(ids.length){
-    const {data,error}=await supabase.from('profiles').select('id,display_name').in('id',ids).order('display_name');
-    if(error){toast('Ошибка профилей: '+error.message);return}
-    athletes=data||[];
+  const {data:allAthletes,error:athleteError}=await supabase.from('profiles').select('id,display_name').eq('role','athlete').order('display_name');
+  if(athleteError){toast('Ошибка загрузки спортсменов: '+athleteError.message);return}
+  athletes=allAthletes||[];
+  if(athletes.length){
+    const links=athletes.filter(a=>a.id!==currentUser.id).map(a=>({coach_id:currentUser.id,athlete_id:a.id}));
+    if(links.length){
+      const {error}=await supabase.from('coach_athletes').upsert(links,{onConflict:'coach_id,athlete_id',ignoreDuplicates:true});
+      if(error)toast('Связи команды: '+error.message);
+    }
   }
   const athleteOptions=athletes.map(a=>`<option value="${esc(a.id)}">${esc(a.display_name)}</option>`).join('');
   $('taskAthlete').innerHTML=athleteOptions||'<option value="">Сначала подключи спортсмена</option>';
   $('skillAthlete').innerHTML=athleteOptions||'<option value="">Нет спортсменов</option>';
   $('coachAthletes').innerHTML=athletes.map(a=>`<div class="item"><div><strong>${esc(a.display_name)}</strong><span class="small">Подключённый спортсмен</span></div><span class="tag">Активен</span></div>`).join('')||'<div class="empty">Пока нет спортсменов. Передай код приглашения спортсмену.</div>';
   $('coachInviteCode').textContent=profile.invite_code||'Не назначен';
-  $('inviteHelp').textContent=profile.invite_code?'Спортсмен может подключиться в своём кабинете.':'Попроси администратора назначить invite_code в профиле тренера.';
+  $('inviteHelp').textContent='Общий код приглашения для подключения к команде.';
   const [taskRes,newsRes,skillRes]=await Promise.all([
     supabase.from('training_tasks').select('id,athlete_id,title,sets_count,reps_count,rest_seconds,status,due_date,created_at').eq('coach_id',currentUser.id).order('created_at',{ascending:false}),
     supabase.from('coach_news').select('id,title,content,created_at').eq('coach_id',currentUser.id).order('created_at',{ascending:false}),
@@ -391,19 +295,29 @@ async function sendTaskReport(id){
 }
 window.updateTaskStatus=updateTaskStatus;window.completeTask=completeTask;window.sendTaskReport=sendTaskReport;window.joinCoach=joinCoach;
 
+
 async function handleAuthChange(event,session){
   currentUser=session?.user||null;
-  if(!currentUser){profile=null;show('authView');$('userbar').classList.add('hidden');return}
-  if(event==='SIGNED_IN'||event==='INITIAL_SESSION'||!profile)await loadProfile();
+  if(currentUser&&(!profile||event==='SIGNED_IN'||event==='INITIAL_SESSION'))await loadProfile();
 }
 supabase.auth.onAuthStateChange((event,session)=>{queueMicrotask(()=>handleAuthChange(event,session))});
 (async()=>{
   show('loadingView');
   const {data,error}=await supabase.auth.getSession();
-  if(error){setMessage(error.message,true);show('authView');return}
+  if(error){$('pendingMessage').textContent=error.message;show('pendingView');return}
   currentUser=data.session?.user||null;
-  if(currentUser)await loadProfile();else show('authView');
-})();
+  if(!currentUser){
+    const {data:guest,error:guestError}=await supabase.auth.signInAnonymously({options:{data:{display_name:'Гость'}}});
+    if(guestError){
+      $('pendingMessage').textContent=/anonymous sign-ins are disabled|anonymous provider is disabled/i.test(guestError.message)
+        ? 'В Supabase не включён Anonymous Sign-Ins. Включите его в Authentication → Sign In / Providers.'
+        : 'Не удалось открыть сайт: '+guestError.message;
+      show('pendingView');return;
+    }
+    currentUser=guest.user||guest.session?.user||null;
+  }
+  await loadProfile();
+
 })();
 </script>
 </body>
