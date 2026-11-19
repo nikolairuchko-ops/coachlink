@@ -98,9 +98,7 @@
 'use strict';
 const SUPABASE_URL = 'https://gozakkwuwkylvcugtmps.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_UgAje7Wu7ersI3pPsV645w_7HIvf_bz';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
-});
+let supabase;
 let currentUser = null;
 let profile = null;
 let selectedLoginRole = 'coach';
@@ -300,10 +298,27 @@ async function handleAuthChange(event,session){
   currentUser=session?.user||null;
   if(currentUser&&(!profile||event==='SIGNED_IN'||event==='INITIAL_SESSION'))await loadProfile();
 }
-supabase.auth.onAuthStateChange((event,session)=>{queueMicrotask(()=>handleAuthChange(event,session))});
 (async()=>{
   show('loadingView');
-  const {data,error}=await supabase.auth.getSession();
+  try {
+    if(!window.supabase?.createClient){
+      $('pendingMessage').textContent='Загружаем библиотеку подключения…';
+      show('pendingView');
+      await new Promise((resolve,reject)=>{
+        const script=document.createElement('script');
+        script.src='https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js';
+        script.onload=resolve;
+        script.onerror=()=>reject(new Error('Не удалось загрузить библиотеку Supabase с основного и резервного CDN.'));
+        document.head.appendChild(script);
+      });
+    }
+    if(!window.supabase?.createClient) throw new Error('Библиотека Supabase недоступна. Проверьте блокировщик рекламы или подключение к CDN.');
+    supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+      auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}
+    });
+    supabase.auth.onAuthStateChange((event,session)=>{queueMicrotask(()=>handleAuthChange(event,session))});
+    show('loadingView');
+    const {data,error}=await supabase.auth.getSession();
   if(error){$('pendingMessage').textContent=error.message;show('pendingView');return}
   currentUser=data.session?.user||null;
   if(!currentUser){
@@ -317,7 +332,11 @@ supabase.auth.onAuthStateChange((event,session)=>{queueMicrotask(()=>handleAuthC
     currentUser=guest.user||guest.session?.user||null;
   }
   await loadProfile();
-
+  } catch (startupError) {
+    console.error('COACH LINK startup error:',startupError);
+    $('pendingMessage').textContent='Ошибка запуска: '+(startupError?.message||String(startupError));
+    show('pendingView');
+  }
 })();
 </script>
 </body>
