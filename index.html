@@ -69,6 +69,12 @@
 
 
 
+<section id="qrApproveView" class="card qrapprove hidden">
+  <div class="eyebrow">COACH LINK · ПОДТВЕРЖДЕНИЕ ВХОДА</div>
+  <h1>Войти на компьютере?</h1>
+  <p id="qrApproveMessage" class="muted">Проверь, что QR-код открыт на твоём компьютере.</p>
+  <button id="qrApproveButton" class="btn green" type="button" onclick="approveQrLogin()">Подтвердить вход на компьютере</button>
+</section>
 <section id="loadingView" class="card hidden"><h2>Подключаемся…</h2><p class="muted">Открываем COACH LINK.</p></section>
 <section id="pendingView" class="card hidden"><h2>Не удалось подключиться</h2><p id="pendingMessage" class="muted">Проверьте подключение и обновите страницу.</p><div class="actions"><button class="btn secondary" onclick="location.reload()">Повторить</button></div></section>
 
@@ -161,7 +167,7 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
-function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);}
+function show(view){['authView','qrApproveView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);}
 
 let authBusy=false;
 function showAuthPanel(panel){
@@ -248,9 +254,8 @@ async function approveQrLogin(){
     const ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv},aes,new TextEncoder().encode(JSON.stringify(session)));
     const encrypted_session={ephemeral_public_key:b64u(ephemeralRaw),iv:b64u(iv),ciphertext:b64u(ciphertext)};
     await qrApi({action:'approve',id:p.id,challenge:p.challenge,encrypted_session});
-    $('phoneQrApproval').textContent='Вход на компьютере подтверждён. Можно вернуться к компьютеру.';
-    $('phoneQrApproval').classList.remove('hidden');qrPendingApproval=null;
-  }catch(e){$('phoneQrApproval').textContent=e.message||'Не удалось подтвердить вход';$('phoneQrApproval').classList.remove('hidden')}
+    $('qrApproveMessage').textContent='Вход на компьютере подтверждён. Можно вернуться к компьютеру.';$('qrApproveButton').disabled=true;$('qrApproveButton').textContent='Вход подтверждён';qrPendingApproval=null;
+  }catch(e){$('qrApproveMessage').textContent=e.message||'Не удалось подтвердить вход';$('qrApproveButton').disabled=false}
 }
 window.approveQrLogin=approveQrLogin;
 let pendingPhone='',pendingPhoneMode='login',adminPhonePending='';
@@ -378,8 +383,9 @@ async function loadProfile(){
   $('userLabel').textContent=profile.display_name+' · '+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[profile.role]);
   await renderDashboard();
   if(qrPendingApproval){
-    $('phoneQrApproval').innerHTML='Запрос на вход в COACH LINK с компьютера. Убедись, что это твой компьютер, и только затем подтверди вход.<br><button class="btn green" type="button" style="margin-top:10px" onclick="approveQrLogin()">Подтвердить вход на компьютере</button>';
-    $('phoneQrApproval').classList.remove('hidden');
+    $('qrApproveMessage').textContent='Запрос на вход в COACH LINK с компьютера. Убедись, что это твой компьютер, и только затем подтверди вход.';
+    $('qrApproveButton').disabled=false;$('qrApproveButton').textContent='Подтвердить вход на компьютере';
+    show('qrApproveView');
   }
 }
 async function guardRoute(){
@@ -553,9 +559,8 @@ async function handleAuthChange(event,session){
     qrPendingApproval=readQrRoute();
     if(qrPendingApproval){
       if(!qrPendingApproval.id||!qrPendingApproval.challenge||!qrPendingApproval.public_key)throw new Error('QR-ссылка повреждена.');
-      $('phoneQrApproval').classList.remove('hidden');
-      if(currentUser&&!currentUser.is_anonymous){$('phoneQrApproval').textContent='Проверяем аккаунт. После загрузки профиля появится кнопка подтверждения.';}
-      else{$('phoneQrApproval').textContent='Войди по SMS на этом телефоне, чтобы подтвердить запрос на вход.';}
+      if(currentUser&&!currentUser.is_anonymous){$('qrApproveMessage').textContent='Проверяем аккаунт. После загрузки профиля появится подтверждение.';}
+      else{$('qrApproveMessage').textContent='Войди по SMS на этом телефоне, чтобы подтвердить запрос на вход.';}
     }
     if(currentUser?.is_anonymous){
       await supabase.auth.signOut();
