@@ -9,7 +9,7 @@
 <style>
 :root{color-scheme:dark;--bg:#0b1220;--panel:#131e30;--panel2:#1a2940;--line:#293a54;--text:#eef4ff;--muted:#9aabc4;--blue:#4ea1ff;--green:#35d49a;--orange:#ffb454;--red:#ff6d79}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% -10%,#203a60 0,transparent 36%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;color:inherit}.wrap{max-width:1120px;margin:auto;padding:20px 16px 48px;min-height:100vh}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{font-weight:950;letter-spacing:.12em;font-size:19px}.brand span{color:var(--blue)}.userbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.muted,.small{color:var(--muted)}.small{font-size:12px}.card{background:linear-gradient(160deg,#17253a,#111b2b);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 30px #0002}.auth{max-width:470px;margin:7vh auto}.auth h1{font-size:30px;margin:6px 0}.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--blue);font-weight:800}.tabs{display:flex;gap:7px;margin:18px 0}.tabs button{background:#14243a;border:1px solid var(--line);padding:9px 12px;border-radius:10px;color:var(--muted)}.tabs button.active{background:#24476d;color:white}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;color:var(--muted)}input,textarea,select{width:100%;background:#0b1626;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;outline:none}textarea{min-height:78px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--blue)}.btn{background:var(--blue);color:#071528;font-weight:800;padding:11px 14px;border:0;border-radius:11px}.btn.secondary{background:#263a55;color:var(--text);border:1px solid #3b5270}.btn.green{background:var(--green);color:#062319}.btn.orange{background:var(--orange);color:#2a1904}.btn.red{background:#532c3b;color:#ffdce0;border:1px solid #84404d}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.actions .btn{flex:0 0 auto}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}.span12{grid-column:span 12}.hero{margin:12px 0 20px}.hero h1{font-size:clamp(25px,5vw,36px);line-height:1.1;margin:6px 0}.hero p{margin:6px 0;color:var(--muted)}.card h2{font-size:18px;margin:0 0 12px}.statrow{display:flex;gap:10px;flex-wrap:wrap}.stat{flex:1;min-width:100px;background:#0d1828;border:1px solid var(--line);padding:12px;border-radius:13px}.stat b{display:block;font-size:24px}.list{display:grid;gap:9px}.item{background:#0e1929;border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}.item strong{display:block}.item .small{display:block}.tag{font-size:11px;border-radius:99px;padding:4px 8px;background:#263b55;color:#c5dcf7;white-space:nowrap}.tag.done{background:#164333;color:#8af0c6}.tag.progress{background:#4a371c;color:#ffd18c}.notice{border-left:3px solid var(--orange);padding:10px 12px;background:#2b261e;border-radius:8px;color:#ffe0b4;font-size:13px;margin:12px 0}.hidden{display:none!important}.error{color:#ff9ba3}.success{color:#8af0c6}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#eaf4ff;color:#102039;padding:11px 16px;border-radius:12px;box-shadow:0 8px 30px #0006;z-index:10;font-weight:700;max-width:90%;text-align:center}.footer{text-align:center;color:#657995;font-size:11px;margin-top:25px}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}.sectionhead{display:flex;justify-content:space-between;gap:12px;align-items:center}.empty{color:var(--muted);font-size:13px;padding:8px 0}.code{font-size:20px;letter-spacing:.12em;font-weight:900;color:#9bcaff}.task-actions{display:flex;gap:6px;flex-wrap:wrap}.task-actions button{padding:7px 9px;font-size:12px}.badge{font-size:12px;color:var(--muted)}.linkbtn{background:none;border:0;color:var(--blue);padding:4px 0;text-decoration:underline}
-@media(max-width:720px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.wrap{padding:14px 12px 32px}.card{padding:14px}.top{align-items:flex-start}.userbar{justify-content:flex-end}.row{flex-direction:column;gap:0}.auth{margin:4vh auto}.item{align-items:flex-start}.sectionhead{align-items:flex-start;flex-direction:column}}
+.qrbox{display:grid;place-items:center;gap:10px;padding:14px;margin-top:14px;border:1px solid var(--line);border-radius:14px;background:#0d1828}.qrbox canvas,.qrbox img{max-width:100%;height:auto!important}.qrstatus{font-size:13px;color:var(--muted);text-align:center}.qrapprove{max-width:560px;margin:7vh auto}.qrapprove .btn{margin-top:8px}@media(max-width:720px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.wrap{padding:14px 12px 32px}.card{padding:14px}.top{align-items:flex-start}.userbar{justify-content:flex-end}.row{flex-direction:column;gap:0}.auth{margin:4vh auto}.item{align-items:flex-start}.sectionhead{align-items:flex-start;flex-direction:column}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 </head>
@@ -40,6 +40,8 @@
         <button class="btn secondary" type="submit">Войти по email</button><p><button class="linkbtn" type="button" onclick="showAuthPanel('forgot')">Восстановить пароль по email</button></p>
       </form>
     </details>
+    <button class="btn secondary" type="button" onclick="startQrLogin()">Войти по QR-коду с телефона</button>
+    <div id="phoneQrApproval" class="notice hidden">Этот запрос на вход в COACH LINK создан на другом устройстве. Войдите на телефоне и подтвердите вход.</div>
   </div>
   <form id="otpForm" class="hidden" onsubmit="event.preventDefault();verifyPhoneOtp()">
     <div class="eyebrow">ПОДТВЕРЖДЕНИЕ НОМЕРА</div><h1>Введите код из SMS</h1><p id="otpPhoneLabel" class="muted"></p>
@@ -57,6 +59,11 @@
     <div class="field"><label for="confirmPassword">Повторите пароль</label><input id="confirmPassword" type="password" minlength="8" required autocomplete="new-password"></div>
     <button class="btn green" type="submit">Сохранить пароль</button>
   </form>
+  <div class="qrbox" id="desktopQrPanel" hidden>
+    <div id="desktopQr"></div>
+    <div id="desktopQrStatus" class="qrstatus">Сканируй QR камерой телефона. Срок действия — 2 минуты.</div>
+    <button class="btn secondary" type="button" onclick="cancelQrLogin()">Отмена</button>
+  </div>
   <p id="authMessage" class="small" aria-live="polite"></p>
 </section>
 
@@ -166,6 +173,86 @@ window.showAuthPanel=showAuthPanel;
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 window.scrollToTop=scrollToTop;
+let qrPollTimer=null,qrActive=null,qrDesktopPrivateKey=null,qrPendingApproval=null;
+const QR_FUNCTION_URL=SUPABASE_URL+'/functions/v1/qr-login';
+function b64u(bytes){let s='';for(const b of new Uint8Array(bytes))s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function unb64u(value){const s=value.replace(/-/g,'+').replace(/_/g,'/');const bin=atob(s+'='.repeat((4-s.length%4)%4));return Uint8Array.from(bin,c=>c.charCodeAt(0))}
+async function qrApi(body){
+  const {data,error}=await supabase.functions.invoke('qr-login',{body});
+  if(error)throw error;if(data?.error)throw new Error(data.error);return data;
+}
+async function startQrLogin(){
+  try{
+    if(!window.QRCode){await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=resolve;s.onerror=()=>reject(new Error('Не удалось загрузить генератор QR.'));document.head.appendChild(s)})}
+    const pair=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+    const publicRaw=await crypto.subtle.exportKey('raw',pair.publicKey);
+    const challenge=b64u(crypto.getRandomValues(new Uint8Array(32)));
+    const request=await qrApi({action:'create',challenge,public_key:b64u(publicRaw)});
+    qrDesktopPrivateKey=pair.privateKey;qrActive={id:request.id,challenge};
+    $('desktopQr').innerHTML='';$('desktopQrPanel').hidden=false;
+    const payload={id:request.id,challenge,public_key:b64u(publicRaw)};
+    const url=location.origin+location.pathname+'?qr='+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload)))));
+    new QRCode($('desktopQr'),{text:url,width:220,height:220,colorDark:'#102039',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    $('desktopQrStatus').textContent='Открой камеру телефона и отсканируй код. Он действует 2 минуты.';
+    pollQrLogin();
+  }catch(e){setMessage(e.message||'Не удалось создать QR-вход',true)}
+}
+window.startQrLogin=startQrLogin;
+async function pollQrLogin(){
+  if(!qrActive)return;
+  try{
+    const result=await qrApi({action:'poll',id:qrActive.id,challenge:qrActive.challenge});
+    if(result.status==='approved'&&result.encrypted_session){
+      $('desktopQrStatus').textContent='Вход подтверждён. Завершаем авторизацию…';
+      const encrypted=result.encrypted_session;
+      const ephemeral=await crypto.subtle.importKey('raw',unb64u(encrypted.ephemeral_public_key),{name:'ECDH',namedCurve:'P-256'},false,[]);
+      const bits=await crypto.subtle.deriveBits({name:'ECDH',public:ephemeral},qrDesktopPrivateKey,256);
+      const material=await crypto.subtle.importKey('raw',bits,'HKDF',false,['deriveKey']);
+      const aes=await crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:unb64u(qrActive.challenge),info:new TextEncoder().encode('COACH-LINK-QR-v1')},material,{name:'AES-GCM',length:256},false,['decrypt']);
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64u(encrypted.iv)},aes,unb64u(encrypted.ciphertext));
+      const session=JSON.parse(new TextDecoder().decode(plain));
+      await qrApi({action:'consume',id:qrActive.id,challenge:qrActive.challenge});
+      qrActive=null;qrDesktopPrivateKey=null;$('desktopQrPanel').hidden=true;
+      const {error}=await supabase.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
+      if(error)throw error;
+      toast('Вход по QR подтверждён.');return;
+    }
+    if(result.status==='expired'||result.status==='consumed'||result.status==='cancelled'){
+      $('desktopQrStatus').textContent='QR-код истёк или уже использован. Создай новый.';qrActive=null;return;
+    }
+  }catch(e){$('desktopQrStatus').textContent='Ожидание входа… '+(e.message||'');}
+  if(qrActive)qrPollTimer=setTimeout(pollQrLogin,2200);
+}
+function cancelQrLogin(){
+  if(qrPollTimer)clearTimeout(qrPollTimer);qrPollTimer=null;qrActive=null;qrDesktopPrivateKey=null;
+  $('desktopQrPanel').hidden=true;$('desktopQr').innerHTML='';
+}
+window.cancelQrLogin=cancelQrLogin;
+function readQrRoute(){
+  const raw=new URLSearchParams(location.search).get('qr');if(!raw)return null;
+  try{return JSON.parse(decodeURIComponent(escape(atob(raw))))}catch{return null}
+}
+async function approveQrLogin(){
+  if(!qrPendingApproval||!currentUser||currentUser.is_anonymous)return;
+  try{
+    const p=qrPendingApproval;
+    const session=(await supabase.auth.getSession()).data.session;
+    if(!session)throw new Error('Сначала войди в аккаунт на телефоне.');
+    const desktopPublic=await crypto.subtle.importKey('raw',unb64u(p.public_key),{name:'ECDH',namedCurve:'P-256'},false,[]);
+    const pair=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+    const ephemeralRaw=await crypto.subtle.exportKey('raw',pair.publicKey);
+    const bits=await crypto.subtle.deriveBits({name:'ECDH',public:desktopPublic},pair.privateKey,256);
+    const material=await crypto.subtle.importKey('raw',bits,'HKDF',false,['deriveKey']);
+    const aes=await crypto.subtle.deriveKey({name:'HKDF',hash:'SHA-256',salt:unb64u(p.challenge),info:new TextEncoder().encode('COACH-LINK-QR-v1')},material,{name:'AES-GCM',length:256},false,['encrypt']);
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv},aes,new TextEncoder().encode(JSON.stringify(session)));
+    const encrypted_session={ephemeral_public_key:b64u(ephemeralRaw),iv:b64u(iv),ciphertext:b64u(ciphertext)};
+    await qrApi({action:'approve',id:p.id,challenge:p.challenge,encrypted_session});
+    $('phoneQrApproval').textContent='Вход на компьютере подтверждён. Можно вернуться к компьютеру.';
+    $('phoneQrApproval').classList.remove('hidden');qrPendingApproval=null;
+  }catch(e){$('phoneQrApproval').textContent=e.message||'Не удалось подтвердить вход';$('phoneQrApproval').classList.remove('hidden')}
+}
+window.approveQrLogin=approveQrLogin;
 let pendingPhone='',pendingPhoneMode='login',adminPhonePending='';
 function normalizePhone(value){
   const phone=String(value||'').replace(/[\s()-]/g,'');
@@ -290,6 +377,7 @@ async function loadProfile(){
   }
   $('userLabel').textContent=profile.display_name+' · '+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[profile.role]);
   await renderDashboard();
+  if(qrPendingApproval)await approveQrLogin();
 }
 async function guardRoute(){
   if(!currentUser){show('authView');return}
@@ -459,6 +547,13 @@ async function handleAuthChange(event,session){
     const {data,error}=await supabase.auth.getSession();
     if(error)throw error;
     currentUser=data.session?.user||null;
+    qrPendingApproval=readQrRoute();
+    if(qrPendingApproval){
+      if(!qrPendingApproval.id||!qrPendingApproval.challenge||!qrPendingApproval.public_key)throw new Error('QR-ссылка повреждена.');
+      $('phoneQrApproval').classList.remove('hidden');
+      if(currentUser&&!currentUser.is_anonymous){$('phoneQrApproval').textContent='Подтверждаем вход на компьютере…';}
+      else{$('phoneQrApproval').textContent='Войди по SMS на этом телефоне, чтобы подтвердить вход на компьютере.';}
+    }
     if(currentUser?.is_anonymous){
       await supabase.auth.signOut();
       currentUser=null;
