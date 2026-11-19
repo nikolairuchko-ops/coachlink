@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="COACH LINK — управление гимнастическими тренировками и прогрессом спортсменов.">
+<title>COACH LINK</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131e30;--panel2:#1a2940;--line:#293a54;--text:#eef4ff;--muted:#9aabc4;--blue:#4ea1ff;--green:#35d49a;--orange:#ffb454;--red:#ff6d79}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% -10%,#203a60 0,transparent 36%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer;color:inherit}.wrap{max-width:1120px;margin:auto;padding:20px 16px 48px;min-height:100vh}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{font-weight:950;letter-spacing:.12em;font-size:19px}.brand span{color:var(--blue)}.userbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.muted,.small{color:var(--muted)}.small{font-size:12px}.card{background:linear-gradient(160deg,#17253a,#111b2b);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 30px #0002}.auth{max-width:470px;margin:7vh auto}.auth h1{font-size:30px;margin:6px 0}.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--blue);font-weight:800}.tabs{display:flex;gap:7px;margin:18px 0}.tabs button{background:#14243a;border:1px solid var(--line);padding:9px 12px;border-radius:10px;color:var(--muted)}.tabs button.active{background:#24476d;color:white}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;color:var(--muted)}input,textarea,select{width:100%;background:#0b1626;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;outline:none}textarea{min-height:78px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--blue)}.btn{background:var(--blue);color:#071528;font-weight:800;padding:11px 14px;border:0;border-radius:11px}.btn.secondary{background:#263a55;color:var(--text);border:1px solid #3b5270}.btn.green{background:var(--green);color:#062319}.btn.orange{background:var(--orange);color:#2a1904}.btn.red{background:#532c3b;color:#ffdce0;border:1px solid #84404d}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.actions .btn{flex:0 0 auto}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}.span12{grid-column:span 12}.hero{margin:12px 0 20px}.hero h1{font-size:clamp(25px,5vw,36px);line-height:1.1;margin:6px 0}.hero p{margin:6px 0;color:var(--muted)}.card h2{font-size:18px;margin:0 0 12px}.statrow{display:flex;gap:10px;flex-wrap:wrap}.stat{flex:1;min-width:100px;background:#0d1828;border:1px solid var(--line);padding:12px;border-radius:13px}.stat b{display:block;font-size:24px}.list{display:grid;gap:9px}.item{background:#0e1929;border:1px solid var(--line);border-radius:13px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}.item strong{display:block}.item .small{display:block}.tag{font-size:11px;border-radius:99px;padding:4px 8px;background:#263b55;color:#c5dcf7;white-space:nowrap}.tag.done{background:#164333;color:#8af0c6}.tag.progress{background:#4a371c;color:#ffd18c}.notice{border-left:3px solid var(--orange);padding:10px 12px;background:#2b261e;border-radius:8px;color:#ffe0b4;font-size:13px;margin:12px 0}.hidden{display:none!important}.error{color:#ff9ba3}.success{color:#8af0c6}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#eaf4ff;color:#102039;padding:11px 16px;border-radius:12px;box-shadow:0 8px 30px #0006;z-index:10;font-weight:700;max-width:90%;text-align:center}.footer{text-align:center;color:#657995;font-size:11px;margin-top:25px}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}.sectionhead{display:flex;justify-content:space-between;gap:12px;align-items:center}.empty{color:var(--muted);font-size:13px;padding:8px 0}.code{font-size:20px;letter-spacing:.12em;font-weight:900;color:#9bcaff}.task-actions{display:flex;gap:6px;flex-wrap:wrap}.task-actions button{padding:7px 9px;font-size:12px}.badge{font-size:12px;color:var(--muted)}
+@media(max-width:720px){.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.wrap{padding:14px 12px 32px}.card{padding:14px}.top{align-items:flex-start}.userbar{justify-content:flex-end}.row{flex-direction:column;gap:0}.auth{margin:4vh auto}.item{align-items:flex-start}.sectionhead{align-items:flex-start;flex-direction:column}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand">COACH <span>LINK</span></div>
+  <div id="userbar" class="userbar hidden"><span id="userLabel" class="small"></span><button class="btn secondary" onclick="signOut()">Выйти</button></div>
+</header>
+
+<section id="authView" class="card auth">
+  <div class="eyebrow">ЕДИНАЯ СИСТЕМА ТРЕНИРОВОК</div>
+  <h1>Добро пожаловать</h1>
+  <p class="muted">Войди в аккаунт или создай профиль спортсмена.</p>
+  <div class="tabs"><button id="loginTab" class="active" onclick="showAuthTab('login')">Вход</button><button id="signupTab" onclick="showAuthTab('signup')">Регистрация</button></div>
+  <form id="loginForm" onsubmit="event.preventDefault();signIn()">
+    <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
+    <button class="btn" type="submit">Войти</button>
+  </form>
+  <form id="signupForm" class="hidden" onsubmit="event.preventDefault();signUp()">
+    <div class="field"><label for="signupName">Имя</label><input id="signupName" autocomplete="name" maxlength="80" required></div>
+    <div class="field"><label for="signupEmail">Электронная почта</label><input id="signupEmail" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="signupPassword">Пароль (минимум 8 символов)</label><input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required></div>
+    <button class="btn" type="submit">Создать аккаунт</button>
+    <p class="small">Новая регистрация всегда создаёт роль «Спортсмен». Роль тренера назначает администратор в Supabase.</p>
+  </form>
+  <p id="authMessage" class="small" aria-live="polite"></p>
+  <p class="small">Доступ к панели открывается только после подтверждённого входа. Данные защищены политиками RLS Supabase.</p>
+</section>
+
+<section id="loadingView" class="card hidden"><h2>Проверяем доступ…</h2><p class="muted">Получаем профиль и роль из Supabase.</p></section>
+<section id="pendingView" class="card hidden"><h2>Профиль ещё не готов</h2><p id="pendingMessage" class="muted">Не удалось загрузить профиль пользователя.</p><div class="actions"><button class="btn secondary" onclick="loadProfile()">Повторить</button><button class="btn secondary" onclick="signOut()">Выйти</button></div></section>
+
+<main id="coachView" class="hidden">
+  <section class="hero"><div class="eyebrow">ПАНЕЛЬ ТРЕНЕРА</div><h1>Управление командой</h1><p>Назначай тренировки, фиксируй навыки и публикуй новости.</p></section>
+  <div class="grid">
+    <section class="card span8"><h2>Моя команда</h2><div id="coachStats" class="statrow"></div><div id="coachAthletes" class="list" style="margin-top:12px"></div></section>
+    <section class="card span4"><h2>Код приглашения</h2><p class="muted small">Передай этот код спортсмену, чтобы он подключился к твоей команде.</p><div id="coachInviteCode" class="code">Не назначен</div><p id="inviteHelp" class="small">Код выдаёт администратор.</p><div class="notice">Роль тренера и код приглашения нельзя назначить самостоятельно через регистрацию.</div></section>
+    <section class="card span7"><h2>Новое задание</h2>
+      <form onsubmit="event.preventDefault();createTask()">
+        <div class="field"><label>Спортсмен</label><select id="taskAthlete" required></select></div>
+        <div class="field"><label>Название упражнения</label><input id="taskTitle" maxlength="160" required placeholder="Например, баланс на одной ноге"></div>
+        <div class="row"><div class="field"><label>Подходы</label><input id="taskSets" type="number" min="1" max="20" value="3" required></div><div class="field"><label>Повторения</label><input id="taskReps" type="number" min="1" max="200" value="10" required></div><div class="field"><label>Отдых, сек.</label><input id="taskRest" type="number" min="0" max="900" value="60" required></div></div>
+        <div class="field"><label>Инструкция</label><textarea id="taskInstructions" maxlength="3000" placeholder="Техника и рекомендации"></textarea></div>
+        <div class="row"><div class="field"><label>Срок</label><input id="taskDue" type="date"></div><div class="field"><label>Видео URL</label><input id="taskVideo" type="url" placeholder="https://..."></div></div>
+        <button class="btn" type="submit">Назначить задание</button>
+      </form>
+    </section>
+    <section class="card span5"><h2>Задания команды</h2><div id="coachTasks" class="list"></div></section>
+    <section class="card span6"><h2>Записать навык</h2>
+      <form onsubmit="event.preventDefault();addSkill()">
+        <div class="field"><label>Спортсмен</label><select id="skillAthlete" required></select></div>
+        <div class="field"><label>Навык</label><input id="skillName" maxlength="120" required placeholder="Например, равновесие"></div>
+        <div class="row"><div class="field"><label>Уровень</label><select id="skillLevel"><option value="1">1 — Начальный</option><option value="2">2 — Осваивает</option><option value="3" selected>3 — Уверенно</option><option value="4">4 — Продвинутый</option><option value="5">5 — Освоен</option></select></div><div class="field"><label>Комментарий</label><input id="skillNote" maxlength="1000"></div></div>
+        <button class="btn green" type="submit">Сохранить результат</button>
+      </form>
+      <div id="coachSkills" class="list" style="margin-top:12px"></div>
+    </section>
+    <section class="card span6"><h2>Новости команды</h2>
+      <form onsubmit="event.preventDefault();publishNews()"><div class="field"><label>Заголовок</label><input id="newsTitle" maxlength="160" required></div><div class="field"><label>Текст</label><textarea id="newsContent" maxlength="5000"></textarea></div><button class="btn" type="submit">Опубликовать</button></form>
+      <div id="coachNews" class="list" style="margin-top:12px"></div>
+    </section>
+  </div>
+</main>
+
+<main id="athleteView" class="hidden">
+  <section class="hero"><div class="eyebrow">КАБИНЕТ СПОРТСМЕНА</div><h1>Мои тренировки</h1><p>Твой план, результаты и новости тренера.</p></section>
+  <div class="grid">
+    <section class="card span8"><div class="sectionhead"><h2>Мои задания</h2><span id="athleteTaskCount" class="badge"></span></div><div id="athleteTasks" class="list"></div></section>
+    <section class="card span4"><h2>Подключить тренера</h2><p class="muted small">Введи код приглашения, который дал тренер.</p><form onsubmit="event.preventDefault();joinCoach()"><div class="field"><label>Код приглашения</label><input id="joinCode" maxlength="80" required placeholder="Код тренера"></div><button class="btn" type="submit">Подключиться</button></form><div id="myCoach" class="small" style="margin-top:12px"></div></section>
+    <section class="card span6"><h2>Мои навыки</h2><div id="athleteSkills" class="list"></div></section>
+    <section class="card span6"><h2>Новости тренера</h2><div id="athleteNews" class="list"></div></section>
+  </div>
+</main>
+<div class="footer">COACH LINK · Supabase Auth · Доступ по ролям · Защита данных RLS</div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+(() => {
+'use strict';
+const SUPABASE_URL = 'https://gozakkwuwkylvcugtmps.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_UgAje7Wu7ersI3pPsV645w_7HIvf_bz';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+});
+let currentUser = null;
+let profile = null;
+let athletes = [];
+let toastTimer = null;
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
+function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
+function show(view){['authView','loadingView','pendingView','coachView','athleteView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser)}
+function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
+function showAuthTab(tab){$('loginForm').classList.toggle('hidden',tab!=='login');$('signupForm').classList.toggle('hidden',tab!=='signup');$('loginTab').classList.toggle('active',tab==='login');$('signupTab').classList.toggle('active',tab==='signup');setMessage('')}
+window.showAuthTab=showAuthTab;
+
+async function signIn(){
+  const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
+  setMessage('Выполняется вход…');
+  const {error}=await supabase.auth.signInWithPassword({email,password});
+  if(error){setMessage(error.message,true);return}
+  await loadProfile();
+}
+async function signUp(){
+  const display_name=$('signupName').value.trim(),email=$('signupEmail').value.trim(),password=$('signupPassword').value;
+  if(display_name.length<2){setMessage('Укажи имя не короче двух символов.',true);return}
+  setMessage('Создаём аккаунт…');
+  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name}}});
+  if(error){setMessage(error.message,true);return}
+  if(data.session){currentUser=data.user;await loadProfile()}
+  else{setMessage('Аккаунт создан. Проверь почту и подтверди адрес, затем войди. Новая роль — «Спортсмен».')}
+}
+async function signOut(){
+  await supabase.auth.signOut();
+  currentUser=null;profile=null;athletes=[];
+  location.hash='#/login';show('authView');$('userbar').classList.add('hidden');
+}
+window.signOut=signOut;
+
+async function loadProfile(){
+  if(!currentUser){show('authView');return}
+  show('loadingView');
+  let result=await supabase.from('profiles').select('id,display_name,role,invite_code').eq('id',currentUser.id).maybeSingle();
+  if(result.error||!result.data){
+    await new Promise(resolve=>setTimeout(resolve,800));
+    result=await supabase.from('profiles').select('id,display_name,role,invite_code').eq('id',currentUser.id).maybeSingle();
+  }
+  if(result.error||!result.data){
+    $('pendingMessage').textContent=result.error?.message||'Профиль ещё не создан. Обнови страницу или обратись к администратору.';
+    show('pendingView');return;
+  }
+  profile=result.data;
+  if(!['coach','athlete'].includes(profile.role)){
+    $('pendingMessage').textContent='Для аккаунта не назначена допустимая роль. Обратись к администратору.';
+    show('pendingView');return;
+  }
+  $('userLabel').textContent=(profile.display_name||currentUser.email)+' · '+(profile.role==='coach'?'Тренер':'Спортсмен');
+  location.hash=profile.role==='coach'?'#/coach':'#/athlete';
+  await renderDashboard();
+}
+async function guardRoute(){
+  if(!currentUser){show('authView');$('userbar').classList.add('hidden');if(location.hash!=='#/login')history.replaceState(null,'','#/login');return}
+  if(!profile){await loadProfile();return}
+  const expected=profile.role==='coach'?'#/coach':'#/athlete';
+  if(location.hash!==expected)history.replaceState(null,'',expected);
+  show(profile.role==='coach'?'coachView':'athleteView');
+}
+window.addEventListener('hashchange',guardRoute);
+
+async function renderDashboard(){
+  if(profile.role==='coach')await loadCoachDashboard();
+  else await loadAthleteDashboard();
+  show(profile.role==='coach'?'coachView':'athleteView');
+}
+async function loadCoachDashboard(){
+  const {data:links,error:linkError}=await supabase.from('coach_athletes').select('athlete_id').eq('coach_id',currentUser.id);
+  if(linkError){toast('Ошибка загрузки команды: '+linkError.message);return}
+  const ids=(links||[]).map(x=>x.athlete_id);
+  athletes=[];
+  if(ids.length){
+    const {data,error}=await supabase.from('profiles').select('id,display_name').in('id',ids).order('display_name');
+    if(error){toast('Ошибка профилей: '+error.message);return}
+    athletes=data||[];
+  }
+  const athleteOptions=athletes.map(a=>`<option value="${esc(a.id)}">${esc(a.display_name)}</option>`).join('');
+  $('taskAthlete').innerHTML=athleteOptions||'<option value="">Сначала подключи спортсмена</option>';
+  $('skillAthlete').innerHTML=athleteOptions||'<option value="">Нет спортсменов</option>';
+  $('coachAthletes').innerHTML=athletes.map(a=>`<div class="item"><div><strong>${esc(a.display_name)}</strong><span class="small">Подключённый спортсмен</span></div><span class="tag">Активен</span></div>`).join('')||'<div class="empty">Пока нет спортсменов. Передай код приглашения спортсмену.</div>';
+  $('coachInviteCode').textContent=profile.invite_code||'Не назначен';
+  $('inviteHelp').textContent=profile.invite_code?'Спортсмен может подключиться в своём кабинете.':'Попроси администратора назначить invite_code в профиле тренера.';
+  const [taskRes,newsRes,skillRes]=await Promise.all([
+    supabase.from('training_tasks').select('id,athlete_id,title,sets_count,reps_count,rest_seconds,status,due_date,created_at').eq('coach_id',currentUser.id).order('created_at',{ascending:false}),
+    supabase.from('coach_news').select('id,title,content,created_at').eq('coach_id',currentUser.id).order('created_at',{ascending:false}),
+    supabase.from('skill_records').select('id,athlete_id,name,level,note,created_at').eq('coach_id',currentUser.id).order('created_at',{ascending:false}).limit(20)
+  ]);
+  if(taskRes.error)toast('Задания: '+taskRes.error.message);
+  if(newsRes.error)toast('Новости: '+newsRes.error.message);
+  if(skillRes.error)toast('Навыки: '+skillRes.error.message);
+  const tasks=taskRes.data||[];
+  const athleteNames=Object.fromEntries(athletes.map(a=>[a.id,a.display_name]));
+  $('coachStats').innerHTML=`<div class="stat"><span class="small">Спортсмены</span><b>${athletes.length}</b></div><div class="stat"><span class="small">Задания</span><b>${tasks.length}</b></div><div class="stat"><span class="small">Выполнено</span><b>${tasks.filter(t=>t.status==='completed').length}</b></div>`;
+  $('coachTasks').innerHTML=tasks.map(t=>`<div class="item"><div><strong>${esc(t.title)}</strong><span class="small">${esc(athleteNames[t.athlete_id]||'Спортсмен')} · ${t.sets_count}×${t.reps_count} · ${t.rest_seconds} сек.</span><span class="tag ${t.status==='completed'?'done':t.status==='in_progress'?'progress':''}">${statusLabel(t.status)}</span></div><button class="btn red" onclick="deleteTask('${t.id}')">Удалить</button></div>`).join('')||'<div class="empty">Заданий пока нет.</div>';
+  $('coachNews').innerHTML=(newsRes.data||[]).map(n=>`<div class="item"><div><strong>${esc(n.title)}</strong><span class="small">${esc(n.content)}</span><span class="small">${dateText(n.created_at)}</span></div><button class="btn red" onclick="deleteNews('${n.id}')">Удалить</button></div>`).join('')||'<div class="empty">Публикаций пока нет.</div>';
+  $('coachSkills').innerHTML=(skillRes.data||[]).map(s=>`<div class="item"><div><strong>${esc(s.name)} · ${esc(athleteNames[s.athlete_id]||'Спортсмен')}</strong><span class="small">${esc(s.note||'')}</span></div><span class="tag">Уровень ${s.level}/5</span></div>`).join('')||'<div class="empty">Отметок пока нет.</div>';
+}
+function statusLabel(status){return ({assigned:'Новое',in_progress:'В работе',rest:'Отдых',completed:'Завершено'})[status]||status}
+async function createTask(){
+  const athlete_id=$('taskAthlete').value,title=$('taskTitle').value.trim(),sets_count=Number($('taskSets').value),reps_count=Number($('taskReps').value),rest_seconds=Number($('taskRest').value),video_url=$('taskVideo').value.trim();
+  if(!athlete_id||!title){toast('Выбери спортсмена и название задания.');return}
+  if(!Number.isInteger(sets_count)||sets_count<1||sets_count>20||!Number.isInteger(reps_count)||reps_count<1||reps_count>200||!Number.isInteger(rest_seconds)||rest_seconds<0||rest_seconds>900){toast('Проверь параметры задания.');return}
+  const payload={coach_id:currentUser.id,athlete_id,title,sets_count,reps_count,rest_seconds,instructions:$('taskInstructions').value.trim(),video_url,due_date:$('taskDue').value||null};
+  const {error}=await supabase.from('training_tasks').insert(payload);
+  if(error){toast('Не удалось создать задание: '+error.message);return}
+  $('taskTitle').value='';$('taskInstructions').value='';$('taskVideo').value='';$('taskDue').value='';
+  toast('Задание назначено.');await loadCoachDashboard();
+}
+async function deleteTask(id){
+  if(!confirm('Удалить это задание?'))return;
+  const {error}=await supabase.from('training_tasks').delete().eq('id',id).eq('coach_id',currentUser.id);
+  if(error){toast('Не удалось удалить: '+error.message);return}
+  toast('Задание удалено.');await loadCoachDashboard();
+}
+async function addSkill(){
+  const athlete_id=$('skillAthlete').value,name=$('skillName').value.trim(),level=Number($('skillLevel').value),note=$('skillNote').value.trim();
+  if(!athlete_id||!name){toast('Выбери спортсмена и укажи навык.');return}
+  const {error}=await supabase.from('skill_records').insert({coach_id:currentUser.id,athlete_id,name,level,note});
+  if(error){toast('Не удалось сохранить навык: '+error.message);return}
+  $('skillName').value='';$('skillNote').value='';toast('Навык сохранён.');await loadCoachDashboard();
+}
+async function publishNews(){
+  const title=$('newsTitle').value.trim(),content=$('newsContent').value.trim();
+  if(!title){toast('Укажи заголовок новости.');return}
+  const {error}=await supabase.from('coach_news').insert({coach_id:currentUser.id,title,content});
+  if(error){toast('Не удалось опубликовать: '+error.message);return}
+  $('newsTitle').value='';$('newsContent').value='';toast('Новость опубликована.');await loadCoachDashboard();
+}
+async function deleteNews(id){
+  if(!confirm('Удалить публикацию?'))return;
+  const {error}=await supabase.from('coach_news').delete().eq('id',id).eq('coach_id',currentUser.id);
+  if(error){toast('Не удалось удалить: '+error.message);return}
+  await loadCoachDashboard();
+}
+window.deleteTask=deleteTask;window.deleteNews=deleteNews;
+
+async function loadAthleteDashboard(){
+  const [taskRes,linkRes,skillRes,subRes]=await Promise.all([
+    supabase.from('training_tasks').select('id,coach_id,title,sets_count,reps_count,rest_seconds,instructions,video_url,status,current_set,elapsed_seconds,athlete_report,due_date,created_at').eq('athlete_id',currentUser.id).order('created_at',{ascending:false}),
+    supabase.from('coach_athletes').select('coach_id').eq('athlete_id',currentUser.id),
+    supabase.from('skill_records').select('id,name,level,note,created_at').eq('athlete_id',currentUser.id).order('created_at',{ascending:false}),
+    supabase.from('news_subscriptions').select('coach_id').eq('athlete_id',currentUser.id)
+  ]);
+  if(taskRes.error)toast('Задания: '+taskRes.error.message);
+  if(linkRes.error)toast('Тренеры: '+linkRes.error.message);
+  if(skillRes.error)toast('Навыки: '+skillRes.error.message);
+  const tasks=taskRes.data||[],links=linkRes.data||[],subs=subRes.data||[];
+  $('athleteTaskCount').textContent=`${tasks.filter(t=>t.status==='completed').length} из ${tasks.length} завершено`;
+  $('athleteTasks').innerHTML=tasks.map(t=>`<div class="item"><div><strong>${esc(t.title)}</strong><span class="small">${t.sets_count} подхода · ${t.reps_count} повторений · отдых ${t.rest_seconds} сек.${t.due_date?' · до '+dateText(t.due_date):''}</span><span class="small">${esc(t.instructions||'')}</span><span class="tag ${t.status==='completed'?'done':t.status==='in_progress'?'progress':''}">${statusLabel(t.status)}</span>${t.athlete_report?`<span class="small">Твой отчёт: ${esc(t.athlete_report)}</span>`:''}</div><div class="task-actions">${t.status!=='completed'?`<button class="btn" onclick="updateTaskStatus('${t.id}','in_progress')">Начать</button><button class="btn orange" onclick="updateTaskStatus('${t.id}','rest')">Отдых</button><button class="btn green" onclick="completeTask('${t.id}')">Готово</button>`:''}<button class="btn secondary" onclick="sendTaskReport('${t.id}')">Отчёт</button></div></div>`).join('')||'<div class="empty">Тренер пока не назначил заданий.</div>';
+  $('athleteSkills').innerHTML=(skillRes.data||[]).map(s=>`<div class="item"><div><strong>${esc(s.name)}</strong><span class="small">${esc(s.note||'')} · ${dateText(s.created_at)}</span></div><span class="tag">Уровень ${s.level}/5</span></div>`).join('')||'<div class="empty">Пока нет отметок о навыках.</div>';
+  $('myCoach').textContent=links.length?`Подключено тренеров: ${links.length}`:'Ты пока не подключён к тренеру.';
+  $('athleteNews').innerHTML='<div class="empty">Проверяем публикации…</div>';
+  const coachIds=[...new Set(subs.map(s=>s.coach_id))];
+  if(!coachIds.length){$('athleteNews').innerHTML='<div class="empty">Подключись к тренеру и оформи подписку, чтобы читать новости.</div>';return}
+  const {data:news,error:newsError}=await supabase.from('coach_news').select('id,coach_id,title,content,created_at').in('coach_id',coachIds).order('created_at',{ascending:false});
+  if(newsError){$('athleteNews').innerHTML='<div class="empty">Новости пока недоступны: '+esc(newsError.message)+'</div>';return}
+  $('athleteNews').innerHTML=(news||[]).map(n=>`<div class="item"><div><strong>${esc(n.title)}</strong><span class="small">${esc(n.content)}</span><span class="small">${dateText(n.created_at)}</span></div></div>`).join('')||'<div class="empty">Новых публикаций нет.</div>';
+}
+async function joinCoach(){
+  const code=$('joinCode').value.trim().toUpperCase();
+  if(!code){toast('Введи код приглашения.');return}
+  const {error}=await supabase.rpc('join_coach_by_code',{code});
+  if(error){toast('Не удалось подключиться: '+error.message);return}
+  const {data:links,error:linkError}=await supabase.from('coach_athletes').select('coach_id').eq('athlete_id',currentUser.id);
+  if(linkError){toast('Подключение выполнено, но список тренеров не загрузился.');return}
+  for(const link of links||[]){
+    const {error:subError}=await supabase.from('news_subscriptions').insert({coach_id:link.coach_id,athlete_id:currentUser.id});
+    if(subError && subError.code!=='23505')console.warn('Subscription not created:',subError.message);
+  }
+  $('joinCode').value='';toast('Ты подключён к тренеру.');await loadAthleteDashboard();
+}
+async function updateTaskStatus(id,status){
+  const {error}=await supabase.from('training_tasks').update({status,updated_at:new Date().toISOString()}).eq('id',id).eq('athlete_id',currentUser.id);
+  if(error){toast('Не удалось обновить задание: '+error.message);return}
+  await loadAthleteDashboard();
+}
+async function completeTask(id){
+  const {error}=await supabase.from('training_tasks').update({status:'completed',updated_at:new Date().toISOString()}).eq('id',id).eq('athlete_id',currentUser.id);
+  if(error){toast('Не удалось завершить задание: '+error.message);return}
+  toast('Задание отмечено выполненным.');await loadAthleteDashboard();
+}
+async function sendTaskReport(id){
+  const report=prompt('Напиши тренеру короткий отчёт о выполнении:');
+  if(report===null)return;
+  const {error}=await supabase.from('training_tasks').update({athlete_report:report.trim(),updated_at:new Date().toISOString()}).eq('id',id).eq('athlete_id',currentUser.id);
+  if(error){toast('Не удалось отправить отчёт: '+error.message);return}
+  toast('Отчёт отправлен тренеру.');await loadAthleteDashboard();
+}
+window.updateTaskStatus=updateTaskStatus;window.completeTask=completeTask;window.sendTaskReport=sendTaskReport;window.joinCoach=joinCoach;
+
+async function handleAuthChange(event,session){
+  currentUser=session?.user||null;
+  if(!currentUser){profile=null;show('authView');$('userbar').classList.add('hidden');return}
+  if(event==='SIGNED_IN'||event==='INITIAL_SESSION'||!profile)await loadProfile();
+}
+supabase.auth.onAuthStateChange((event,session)=>{queueMicrotask(()=>handleAuthChange(event,session))});
+(async()=>{
+  show('loadingView');
+  const {data,error}=await supabase.auth.getSession();
+  if(error){setMessage(error.message,true);show('authView');return}
+  currentUser=data.session?.user||null;
+  if(currentUser)await loadProfile();else show('authView');
+})();
+})();
+</script>
+</body>
+</html>
