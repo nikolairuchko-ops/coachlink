@@ -17,7 +17,7 @@
 <div class="wrap">
 <header class="top">
   <div class="brand">COACH <span>LINK</span></div>
-  <div id="userbar" class="userbar hidden"><span id="userLabel" class="small"></span><button class="btn secondary" onclick="signOut()">Выйти</button></div>
+  <div id="userbar" class="userbar hidden"><span id="userLabel" class="small"></span><button class="btn secondary" onclick="signOut()">Выйти из сессии</button></div>
 </header>
 
 <section id="authView" class="card auth">
@@ -132,7 +132,7 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
-function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);$('userbar').querySelector('button').classList.toggle('hidden',!!currentUser?.is_anonymous);if(view==='authView'){$('staffLogin').classList.add('hidden');$('registerForm').classList.remove('hidden')}}
+function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);if(view==='authView'){$('staffLogin').classList.add('hidden');$('registerForm').classList.remove('hidden')}}
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 function selectLoginRole(role){
   if(!['coach','admin'].includes(role))return;
@@ -195,8 +195,8 @@ async function resetLoginPassword(){
 window.resetLoginPassword=resetLoginPassword;
 
 async function signOut(){
-  if(currentUser?.is_anonymous){toast('Профиль спортсмена привязан к этому браузеру. Не выходи из аккаунта, чтобы не потерять доступ.');return}
-  await supabase.auth.signOut();
+  const {error}=await supabase.auth.signOut();
+  if(error){toast('Не удалось завершить сессию: '+error.message);return}
   currentUser=null;profile=null;athletes=[];
   location.hash='#/login';show('authView');$('userbar').classList.add('hidden');
 }
