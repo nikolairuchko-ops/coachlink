@@ -23,22 +23,18 @@
 <section id="authView" class="card auth">
   <div class="eyebrow">ЕДИНАЯ СИСТЕМА ТРЕНИРОВОК</div>
   <h1>Добро пожаловать</h1>
-  <p class="muted">Войди в аккаунт или создай профиль спортсмена.</p>
-  <div class="tabs"><button id="loginTab" class="active" onclick="showAuthTab('login')">Вход</button><button id="signupTab" onclick="showAuthTab('signup')">Регистрация</button></div>
+  <p class="muted">Выбери свой тип аккаунта и войди.</p>
+  <div class="tabs" role="group" aria-label="Тип аккаунта">
+    <button id="athleteRoleTab" class="active" type="button" onclick="selectLoginRole('athlete')">Спортсмен</button>
+    <button id="coachRoleTab" type="button" onclick="selectLoginRole('coach')">Тренер</button>
+  </div>
   <form id="loginForm" onsubmit="event.preventDefault();signIn()">
     <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="email" required></div>
     <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
     <button class="btn" type="submit">Войти</button>
   </form>
-  <form id="signupForm" class="hidden" onsubmit="event.preventDefault();signUp()">
-    <div class="field"><label for="signupName">Имя</label><input id="signupName" autocomplete="name" maxlength="80" required></div>
-    <div class="field"><label for="signupEmail">Электронная почта</label><input id="signupEmail" type="email" autocomplete="email" required></div>
-    <div class="field"><label for="signupPassword">Пароль (минимум 8 символов)</label><input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required></div>
-    <button class="btn" type="submit">Создать аккаунт</button>
-    <p class="small">Новая регистрация всегда создаёт роль «Спортсмен». Роль тренера назначает администратор в Supabase.</p>
-  </form>
   <p id="authMessage" class="small" aria-live="polite"></p>
-  <p class="small">Доступ к панели открывается только после подтверждённого входа. Данные защищены политиками RLS Supabase.</p>
+  <p class="small">Регистрация на сайте отключена. Учётные записи создаёт администратор, а роль назначается в системе. Доступ защищён Supabase.</p>
 </section>
 
 <section id="loadingView" class="card hidden"><h2>Проверяем доступ…</h2><p class="muted">Получаем профиль и роль из Supabase.</p></section>
@@ -99,6 +95,8 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE
 });
 let currentUser = null;
 let profile = null;
+let selectedLoginRole = 'athlete';
+let enforceLoginRole = false;
 let athletes = [];
 let toastTimer = null;
 const $ = id => document.getElementById(id);
@@ -107,27 +105,25 @@ const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : 
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
 function show(view){['authView','loadingView','pendingView','coachView','athleteView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser)}
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
-function showAuthTab(tab){$('loginForm').classList.toggle('hidden',tab!=='login');$('signupForm').classList.toggle('hidden',tab!=='signup');$('loginTab').classList.toggle('active',tab==='login');$('signupTab').classList.toggle('active',tab==='signup');setMessage('')}
-window.showAuthTab=showAuthTab;
+function selectLoginRole(role){
+  if(!['coach','athlete'].includes(role))return;
+  selectedLoginRole=role;
+  $('athleteRoleTab').classList.toggle('active',role==='athlete');
+  $('coachRoleTab').classList.toggle('active',role==='coach');
+  setMessage('');
+}
+window.selectLoginRole=selectLoginRole;
 
 async function signIn(){
   const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
   setMessage('Выполняется вход…');
-  const {error}=await supabase.auth.signInWithPassword({email,password});
+  const {data,error}=await supabase.auth.signInWithPassword({email,password});
   if(error){setMessage(error.message,true);return}
+  currentUser=data.user;
+  enforceLoginRole=true;
   await loadProfile();
 }
-async function signUp(){
-  const display_name=$('signupName').value.trim(),email=$('signupEmail').value.trim(),password=$('signupPassword').value;
-  if(display_name.length<2){setMessage('Укажи имя не короче двух символов.',true);return}
-  setMessage('Создаём аккаунт…');
-  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name}}});
-  if(error){setMessage(error.message,true);return}
-  if(data.session){currentUser=data.user;await loadProfile()}
-  else{setMessage('Аккаунт создан. Проверь почту и подтверди адрес, затем войди. Новая роль — «Спортсмен».')}
-}
 window.signIn=signIn;
-window.signUp=signUp;
 
 async function signOut(){
   await supabase.auth.signOut();
@@ -149,6 +145,17 @@ async function loadProfile(){
     show('pendingView');return;
   }
   profile=result.data;
+  if(enforceLoginRole && profile.role!==selectedLoginRole){
+    enforceLoginRole=false;
+    await supabase.auth.signOut();
+    currentUser=null;profile=null;
+    show('authView');
+    setMessage(selectedLoginRole==='coach'
+      ? 'У этого аккаунта нет роли тренера. Обратись к администратору.'
+      : 'Этот аккаунт не зарегистрирован как спортсмен. Выбери «Тренер» или обратись к администратору.',true);
+    return;
+  }
+  enforceLoginRole=false;
   if(!['coach','athlete'].includes(profile.role)){
     $('pendingMessage').textContent='Для аккаунта не назначена допустимая роль. Обратись к администратору.';
     show('pendingView');return;
