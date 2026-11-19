@@ -23,15 +23,9 @@
 <section id="authView" class="card auth hidden">
   <div id="authMainPanel">
     <div class="eyebrow">COACH LINK · ЛИЧНЫЙ КАБИНЕТ</div><h1>Вход по номеру телефона</h1><p class="muted">Получите одноразовый код по SMS. Пароль не нужен.</p>
-    <div class="tabs"><button id="loginTab" class="active" type="button" onclick="showAuthPanel('login')">Вход</button><button id="registerTab" type="button" onclick="showAuthPanel('register')">Регистрация</button></div>
     <form id="loginForm" onsubmit="event.preventDefault();sendPhoneOtp('login')">
       <div class="field"><label for="loginPhone">Мобильный телефон</label><input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+380XXXXXXXXX"></div>
-      <button class="btn" type="submit">Получить код по SMS</button><p class="small muted">Введите номер в международном формате, например +380XXXXXXXXX.</p>
-    </form>
-    <form id="registerForm" class="hidden" onsubmit="event.preventDefault();sendPhoneOtp('register')">
-      <div class="field"><label for="registerName">Имя и фамилия</label><input id="registerName" maxlength="100" autocomplete="name" required placeholder="Ваше имя"></div>
-      <div class="field"><label for="registerPhone">Мобильный телефон</label><input id="registerPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+380XXXXXXXXX"></div>
-      <button class="btn green" type="submit">Зарегистрироваться по SMS</button><p class="small muted">Регистрация открыта для спортсменов. Тренеров добавляет администратор.</p>
+      <button class="btn" type="submit">Получить код по SMS</button><p class="small muted">Вход доступен только для уже зарегистрированных пользователей.</p>
     </form>
     <details style="margin-top:18px"><summary class="small muted" style="cursor:pointer">Существующий вход администратора по email</summary>
       <form id="legacyLoginForm" onsubmit="event.preventDefault();login()" style="margin-top:12px">
@@ -172,7 +166,7 @@ function show(view){['authView','qrApproveView','loadingView','pendingView','coa
 let authBusy=false;
 function showAuthPanel(panel){
   ['authMainPanel','otpForm','forgotForm','recoveryForm'].forEach(id=>$(id).classList.toggle('hidden',id!==(panel==='otp'?'otpForm':panel==='forgot'?'forgotForm':panel==='recovery'?'recoveryForm':'authMainPanel')));
-  if($('authMainPanel')){$('loginForm').classList.toggle('hidden',panel!=='login');$('registerForm').classList.toggle('hidden',panel!=='register');$('loginTab').classList.toggle('active',panel==='login');$('registerTab').classList.toggle('active',panel==='register');}
+  if($('authMainPanel'))$('loginForm').classList.toggle('hidden',panel!=='login');
   setMessage('');
 }
 window.showAuthPanel=showAuthPanel;
@@ -268,9 +262,8 @@ async function sendPhoneOtp(mode){
   if(authBusy)return;authBusy=true;
   try{
     const phone=normalizePhone(mode==='register'?$('registerPhone').value:$('loginPhone').value);
-    if(mode==='register'&&$('registerName').value.trim().length<2)throw new Error('Укажи имя не короче двух символов.');
-    const options={shouldCreateUser:mode==='register'};
-    if(mode==='register')options.data={display_name:$('registerName').value.trim()};
+    if(mode!=='login')throw new Error('Самостоятельная регистрация отключена. Обратись к администратору.');
+    const options={shouldCreateUser:false};
     const {error}=await supabase.auth.signInWithOtp({phone,options});
     if(error)throw error;
     pendingPhone=phone;pendingPhoneMode=mode;$('otpPhoneLabel').textContent='Код отправлен на '+phone;showAuthPanel('otp');setMessage('SMS отправлено. Введи шестизначный код.');
@@ -290,11 +283,11 @@ async function verifyPhoneOtp(){
 window.verifyPhoneOtp=verifyPhoneOtp;
 async function resendPhoneOtp(){
   if(!pendingPhone){showAuthPanel('login');return}if(authBusy)return;authBusy=true;
-  try{const options={shouldCreateUser:pendingPhoneMode==='register'};if(pendingPhoneMode==='register')options.data={display_name:$('registerName').value.trim()};const {error}=await supabase.auth.signInWithOtp({phone:pendingPhone,options});if(error)throw error;setMessage('Новый код отправлен.')}
+  try{const options={shouldCreateUser:false};const {error}=await supabase.auth.signInWithOtp({phone:pendingPhone,options});if(error)throw error;setMessage('Новый код отправлен.')}
   catch(e){setMessage(e.message||'Не удалось отправить SMS',true)}finally{authBusy=false}
 }
 window.resendPhoneOtp=resendPhoneOtp;
-function cancelPhoneOtp(){pendingPhone='';$('phoneOtp').value='';showAuthPanel(pendingPhoneMode)}
+function cancelPhoneOtp(){pendingPhone='';$('phoneOtp').value='';showAuthPanel('login')}
 window.cancelPhoneOtp=cancelPhoneOtp;
 async function startAdminPhoneLink(){
   const message=$('adminPhoneMessage');message.textContent='';
