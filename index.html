@@ -27,6 +27,7 @@
     <p style="font-size:17px;max-width:680px">COACH LINK — пространство для тренеров и спортсменов: гимнастика, эквилибр, физическая подготовка и осознанный прогресс.</p>
     <div class="actions" style="margin-top:22px"><button class="btn green" type="button" onclick="openLogin()">Войти в личный кабинет</button><a class="btn secondary" href="#programs" style="text-decoration:none">Изучить разделы</a></div>
   </section>
+  <p id="publicStatus" class="small muted" aria-live="polite"></p>
   <nav class="card actions" aria-label="Навигация по сайту" style="margin:14px 0;position:sticky;top:8px;z-index:5">
     <a class="linkbtn" href="#warmup">Разминка</a><a class="linkbtn" href="#balance">Эквилибр</a><a class="linkbtn" href="#strength">Сила и гибкость</a><a class="linkbtn" href="#method">Методика</a>
   </nav>
@@ -578,7 +579,7 @@ async function handleAuthChange(event,session){
   if(currentUser&&!currentUser.is_anonymous&&(!profile||event==='SIGNED_IN'||event==='INITIAL_SESSION'))await loadProfile();
 }
 (async()=>{
-  show('loadingView');
+  show('publicHome');
   try{
     if(!window.supabase?.createClient){
       await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://unpkg.com/@supabase/supabase-js@2.57.4/dist/umd/supabase.js';script.onload=resolve;script.onerror=()=>reject(new Error('Не удалось загрузить библиотеку Supabase.'));document.head.appendChild(script)});
@@ -607,7 +608,7 @@ async function handleAuthChange(event,session){
     }
   }catch(startupError){
     console.error('COACH LINK startup error:',startupError);
-    $('pendingMessage').textContent='Ошибка запуска: '+(startupError?.message||String(startupError));show('pendingView');
+    $('publicStatus').textContent='Материалы сайта доступны. Вход временно недоступен: '+(startupError?.message||String(startupError));show('publicHome');
   }
 })();
 })();
