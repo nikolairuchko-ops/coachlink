@@ -15,7 +15,9 @@ Deno.serve(async (req: Request) => {
     if (!token) return Response.json({ error: "Authentication required" }, { status: 401, headers: cors });
     const url = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const secretMap = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || secretMap.default;
+    if (!serviceKey) throw new Error("Supabase server secret is not configured.");
     const caller = createClient(url, anonKey, { global: { headers: { Authorization: authorization } } });
     const { data: authData, error: authError } = await caller.auth.getUser(token);
     if (authError || !authData.user) return Response.json({ error: "Invalid session" }, { status: 401, headers: cors });
