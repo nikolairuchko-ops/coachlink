@@ -27,6 +27,7 @@
   <div class="tabs" role="group" aria-label="Тип аккаунта">
     <button id="athleteRoleTab" class="active" type="button" onclick="selectLoginRole('athlete')">Спортсмен</button>
     <button id="coachRoleTab" type="button" onclick="selectLoginRole('coach')">Тренер</button>
+    <button id="adminRoleTab" type="button" onclick="selectLoginRole('admin')">Администратор</button>
   </div>
   <form id="loginForm" onsubmit="event.preventDefault();signIn()">
     <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="email" required></div>
@@ -81,6 +82,27 @@
     <section class="card span6"><h2>Новости тренера</h2><div id="athleteNews" class="list"></div></section>
   </div>
 </main>
+<main id="adminView" class="hidden">
+  <section class="hero"><div class="eyebrow">АДМИНИСТРИРОВАНИЕ COACH LINK</div><h1>Панель администратора</h1><p>Создавай учётные записи тренеров и спортсменов и контролируй доступ.</p></section>
+  <div class="grid">
+    <section class="card span5">
+      <h2>Создать аккаунт</h2>
+      <form id="adminCreateForm" onsubmit="event.preventDefault();createManagedUser()">
+        <div class="field"><label for="managedName">Имя пользователя</label><input id="managedName" maxlength="100" required placeholder="Имя и фамилия"></div>
+        <div class="field"><label for="managedEmail">Электронная почта</label><input id="managedEmail" type="email" autocomplete="off" required placeholder="user@example.com"></div>
+        <div class="field"><label for="managedPassword">Временный пароль (от 8 символов)</label><input id="managedPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+        <div class="field"><label for="managedRole">Роль</label><select id="managedRole"><option value="athlete">Спортсмен</option><option value="coach">Тренер</option></select></div>
+        <button class="btn green" type="submit">Создать аккаунт</button>
+      </form>
+      <p class="small muted">Аккаунты создаются только администратором. Роль «Администратор» нельзя выдать из этой формы.</p>
+      <p id="adminMessage" class="small" aria-live="polite"></p>
+    </section>
+    <section class="card span7">
+      <div class="sectionhead"><h2>Пользователи системы</h2><button class="btn secondary" type="button" onclick="loadAdminUsers()">Обновить</button></div>
+      <div id="adminUsers" class="list"><div class="empty">Загрузка пользователей…</div></div>
+    </section>
+  </div>
+</main>
 <div class="footer">COACH LINK · Supabase Auth · Доступ по ролям · Защита данных RLS</div>
 </div>
 <div id="toast" class="toast hidden"></div>
@@ -103,13 +125,14 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
-function show(view){['authView','loadingView','pendingView','coachView','athleteView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser)}
+function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser)}
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 function selectLoginRole(role){
-  if(!['coach','athlete'].includes(role))return;
+  if(!['coach','athlete','admin'].includes(role))return;
   selectedLoginRole=role;
   $('athleteRoleTab').classList.toggle('active',role==='athlete');
   $('coachRoleTab').classList.toggle('active',role==='coach');
+  $('adminRoleTab').classList.toggle('active',role==='admin');
   setMessage('');
 }
 window.selectLoginRole=selectLoginRole;
@@ -148,34 +171,53 @@ async function loadProfile(){
     await supabase.auth.signOut();
     currentUser=null;profile=null;
     show('authView');
-    setMessage(selectedLoginRole==='coach'
-      ? 'У этого аккаунта нет роли тренера. Обратись к администратору.'
-      : 'Этот аккаунт не зарегистрирован как спортсмен. Выбери «Тренер» или обратись к администратору.',true);
+    setMessage('У этого аккаунта нет роли «'+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[selectedLoginRole])+'». Обратись к администратору.',true);
     return;
   }
   enforceLoginRole=false;
-  if(!['coach','athlete'].includes(profile.role)){
+  if(!['coach','athlete','admin'].includes(profile.role)){
     $('pendingMessage').textContent='Для аккаунта не назначена допустимая роль. Обратись к администратору.';
     show('pendingView');return;
   }
-  $('userLabel').textContent=(profile.display_name||currentUser.email)+' · '+(profile.role==='coach'?'Тренер':'Спортсмен');
-  location.hash=profile.role==='coach'?'#/coach':'#/athlete';
+  const roleLabels={admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'};
+  $('userLabel').textContent=(profile.display_name||currentUser.email)+' · '+roleLabels[profile.role];
+  location.hash=profile.role==='admin'?'#/admin':profile.role==='coach'?'#/coach':'#/athlete';
   await renderDashboard();
 }
 async function guardRoute(){
   if(!currentUser){show('authView');$('userbar').classList.add('hidden');if(location.hash!=='#/login')history.replaceState(null,'','#/login');return}
   if(!profile){await loadProfile();return}
-  const expected=profile.role==='coach'?'#/coach':'#/athlete';
+  const expected=profile.role==='admin'?'#/admin':profile.role==='coach'?'#/coach':'#/athlete';
   if(location.hash!==expected)history.replaceState(null,'',expected);
-  show(profile.role==='coach'?'coachView':'athleteView');
+  show(profile.role==='admin'?'adminView':profile.role==='coach'?'coachView':'athleteView');
 }
 window.addEventListener('hashchange',guardRoute);
 
 async function renderDashboard(){
-  if(profile.role==='coach')await loadCoachDashboard();
+  if(profile.role==='admin')await loadAdminUsers();
+  else if(profile.role==='coach')await loadCoachDashboard();
   else await loadAthleteDashboard();
-  show(profile.role==='coach'?'coachView':'athleteView');
+  show(profile.role==='admin'?'adminView':profile.role==='coach'?'coachView':'athleteView');
 }
+function roleLabel(role){return ({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'})[role]||role}
+async function loadAdminUsers(){
+  if(!profile||profile.role!=='admin')return;
+  $('adminUsers').innerHTML='<div class="empty">Загружаем список…</div>';
+  const {data,error}=await supabase.functions.invoke('admin-users',{body:{action:'list'}});
+  if(error||data?.error){$('adminUsers').innerHTML='<div class="empty error">Не удалось загрузить список: '+esc(data?.error||error?.message||'Ошибка функции')+'. Проверь, что серверная функция admin-users развёрнута.</div>';return}
+  const users=data.users||[];
+  $('adminUsers').innerHTML=users.map(u=>'<div class="item"><div><strong>'+esc(u.display_name||'Без имени')+'</strong><span class="small">'+esc(u.email||'')+'</span><span class="small">'+esc(roleLabel(u.role))+' · '+(u.email_confirmed?'Почта подтверждена':'Почта не подтверждена')+'</span></div><span class="tag">'+esc(u.role)+'</span></div>').join('')||'<div class="empty">Пользователей пока нет.</div>';
+}
+async function createManagedUser(){
+  const display_name=$('managedName').value.trim(),email=$('managedEmail').value.trim(),password=$('managedPassword').value,role=$('managedRole').value;
+  $('adminMessage').textContent='Создаём аккаунт…';$('adminMessage').className='small';
+  const {data,error}=await supabase.functions.invoke('admin-users',{body:{action:'create',display_name,email,password,role}});
+  if(error||data?.error){$('adminMessage').textContent=data?.error||error?.message||'Не удалось создать аккаунт.';$('adminMessage').className='small error';return}
+  $('adminCreateForm').reset();
+  $('adminMessage').textContent='Аккаунт '+data.user.email+' успешно создан. Роль: '+roleLabel(data.user.role)+'.';$('adminMessage').className='small success';
+  await loadAdminUsers();
+}
+window.loadAdminUsers=loadAdminUsers;window.createManagedUser=createManagedUser;
 async function loadCoachDashboard(){
   const {data:links,error:linkError}=await supabase.from('coach_athletes').select('athlete_id').eq('coach_id',currentUser.id);
   if(linkError){toast('Ошибка загрузки команды: '+linkError.message);return}
