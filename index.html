@@ -158,6 +158,8 @@ async function signIn(){
 window.signIn=signIn;
 
 function showRegisterForm(){
+  selectLoginRole('athlete');
+  document.querySelector('#authView .tabs').classList.add('hidden');
   $('loginForm').classList.add('hidden');
   $('registerForm').classList.remove('hidden');
   document.querySelector('#authView > button[onclick="resetLoginPassword()"]').classList.add('hidden');
@@ -166,6 +168,7 @@ function showRegisterForm(){
 }
 window.showRegisterForm=showRegisterForm;
 function showLoginForm(){
+  document.querySelector('#authView .tabs').classList.remove('hidden');
   $('registerForm').classList.add('hidden');
   $('loginForm').classList.remove('hidden');
   document.querySelector('#authView > button[onclick="resetLoginPassword()"]').classList.remove('hidden');
