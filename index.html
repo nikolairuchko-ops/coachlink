@@ -117,11 +117,9 @@ window.selectLoginRole=selectLoginRole;
 async function signIn(){
   const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
   setMessage('Выполняется вход…');
-  const {data,error}=await supabase.auth.signInWithPassword({email,password});
-  if(error){setMessage(error.message,true);return}
-  currentUser=data.user;
   enforceLoginRole=true;
-  await loadProfile();
+  const {error}=await supabase.auth.signInWithPassword({email,password});
+  if(error){enforceLoginRole=false;setMessage(error.message,true);return}
 }
 window.signIn=signIn;
 
