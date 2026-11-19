@@ -11,7 +11,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405, headers: cors });
   try {
     const authorization = req.headers.get("Authorization") || "";
-    const token = authorization.replace(/^Bearer\\s+/i, "");
+    const token = authorization.replace(/^Bearer\s+/i, "");
     if (!token) return Response.json({ error: "Authentication required" }, { status: 401, headers: cors });
     const url = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
@@ -42,7 +42,7 @@ Deno.serve(async (req: Request) => {
     const password = String(body.password || "");
     const displayName = String(body.display_name || "").trim();
     const role = String(body.role || "");
-    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || password.length < 8 || !displayName || !["coach", "athlete"].includes(role)) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8 || !displayName || !["coach", "athlete"].includes(role)) {
       return Response.json({ error: "Укажи корректный email, имя, пароль от 8 символов и роль тренера или спортсмена." }, { status: 400, headers: cors });
     }
     const { data: created, error: createError } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { display_name: displayName } });
