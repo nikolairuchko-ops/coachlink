@@ -176,7 +176,7 @@ function clShowAthlete(id){
 function clSelectAthlete(id){clActiveAthleteId=id;clSaveRoster();render();}
 function clCreateTaskForSelected(){
  const a=clAthletes.find(x=>x.id===$('targetAthlete').value);if(!a){msg('Сначала добавьте спортсмена');return;}
- const before=tasks.length;createTask();
+ const before=tasks.length;clPreviousCreateTask();
  if(tasks.length>before){tasks[0].athleteId=a.id;tasks[0].athlete=clFullName(a);save();render();}
 }
 const clPreviousCreateTask=createTask;
