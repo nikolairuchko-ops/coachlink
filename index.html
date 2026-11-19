@@ -141,7 +141,6 @@ const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : 
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
 function show(view){['authView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);}
 
-function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 let authBusy=false;
 function showAuthPanel(panel){
   ['authMainPanel','forgotForm','recoveryForm'].forEach(id=>$(id).classList.toggle('hidden',id!==(panel==='forgot'?'forgotForm':panel==='recovery'?'recoveryForm':'authMainPanel')));
@@ -227,7 +226,7 @@ async function loadProfile(){
     $('pendingMessage').textContent='Для этой учётной записи не назначена роль. Обратитесь к администратору.';
     show('pendingView');return;
   }
-  $('userLabel').textContent=esc(profile.display_name)+' · '+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[profile.role]);
+  $('userLabel').textContent=profile.display_name+' · '+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[profile.role]);
   await renderDashboard();
 }
 async function guardRoute(){
