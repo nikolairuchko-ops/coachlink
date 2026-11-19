@@ -34,6 +34,7 @@
     <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required></div>
     <button class="btn" type="submit">Войти</button>
   </form>
+  <button class="btn secondary" type="button" onclick="resetLoginPassword()">Забыли пароль? Отправить ссылку для сброса</button>
   <p id="authMessage" class="small" aria-live="polite"></p>
   <p class="small">Регистрация на сайте отключена. Учётные записи создаёт администратор, а роль назначается в системе. Доступ защищён Supabase.</p>
 </section>
@@ -145,6 +146,17 @@ async function signIn(){
   if(error){enforceLoginRole=false;setMessage(error.message,true);return}
 }
 window.signIn=signIn;
+
+async function resetLoginPassword(){
+  const email=$('loginEmail').value.trim();
+  if(!email){setMessage('Сначала укажи электронную почту аккаунта.');$('loginEmail').focus();return}
+  setMessage('Отправляем ссылку для сброса пароля…');
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error){setMessage('Не удалось отправить письмо: '+error.message,true);return}
+  setMessage('Если аккаунт существует, на эту почту отправлена ссылка для сброса пароля. Проверь также папку «Спам».');
+}
+window.resetLoginPassword=resetLoginPassword;
 
 async function signOut(){
   await supabase.auth.signOut();
