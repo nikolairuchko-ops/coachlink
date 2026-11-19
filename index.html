@@ -22,22 +22,30 @@
 
 <section id="authView" class="card auth hidden">
   <div id="authMainPanel">
-    <div class="eyebrow">COACH LINK · ЛИЧНЫЙ КАБИНЕТ</div><h1>Добро пожаловать</h1><p class="muted">Войдите в аккаунт или зарегистрируйтесь как спортсмен.</p>
+    <div class="eyebrow">COACH LINK · ЛИЧНЫЙ КАБИНЕТ</div><h1>Вход по номеру телефона</h1><p class="muted">Получите одноразовый код по SMS. Пароль не нужен.</p>
     <div class="tabs"><button id="loginTab" class="active" type="button" onclick="showAuthPanel('login')">Вход</button><button id="registerTab" type="button" onclick="showAuthPanel('register')">Регистрация</button></div>
-    <form id="loginForm" onsubmit="event.preventDefault();login()">
-      <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="name@example.com"></div>
-      <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
-      <button class="btn" type="submit">Войти</button>
-      <p><button class="linkbtn" type="button" onclick="showAuthPanel('forgot')">Забыли пароль?</button></p>
+    <form id="loginForm" onsubmit="event.preventDefault();sendPhoneOtp('login')">
+      <div class="field"><label for="loginPhone">Мобильный телефон</label><input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+380XXXXXXXXX"></div>
+      <button class="btn" type="submit">Получить код по SMS</button><p class="small muted">Введите номер в международном формате, например +380XXXXXXXXX.</p>
     </form>
-    <form id="registerForm" class="hidden" onsubmit="event.preventDefault();registerAthlete()">
+    <form id="registerForm" class="hidden" onsubmit="event.preventDefault();sendPhoneOtp('register')">
       <div class="field"><label for="registerName">Имя и фамилия</label><input id="registerName" maxlength="100" autocomplete="name" required placeholder="Ваше имя"></div>
-      <div class="field"><label for="registerEmail">Электронная почта</label><input id="registerEmail" type="email" autocomplete="email" required placeholder="name@example.com"></div>
-      <div class="field"><label for="registerPassword">Пароль (не менее 8 символов)</label><input id="registerPassword" type="password" minlength="8" autocomplete="new-password" required></div>
-      <button class="btn green" type="submit">Создать аккаунт спортсмена</button>
-      <p class="small muted">Регистрация открыта для спортсменов. Тренеров добавляет администратор.</p>
+      <div class="field"><label for="registerPhone">Мобильный телефон</label><input id="registerPhone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="+380XXXXXXXXX"></div>
+      <button class="btn green" type="submit">Зарегистрироваться по SMS</button><p class="small muted">Регистрация открыта для спортсменов. Тренеров добавляет администратор.</p>
     </form>
+    <details style="margin-top:18px"><summary class="small muted" style="cursor:pointer">Существующий вход администратора по email</summary>
+      <form id="legacyLoginForm" onsubmit="event.preventDefault();login()" style="margin-top:12px">
+        <div class="field"><label for="loginEmail">Электронная почта</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="name@example.com"></div>
+        <div class="field"><label for="loginPassword">Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
+        <button class="btn secondary" type="submit">Войти по email</button><p><button class="linkbtn" type="button" onclick="showAuthPanel('forgot')">Восстановить пароль по email</button></p>
+      </form>
+    </details>
   </div>
+  <form id="otpForm" class="hidden" onsubmit="event.preventDefault();verifyPhoneOtp()">
+    <div class="eyebrow">ПОДТВЕРЖДЕНИЕ НОМЕРА</div><h1>Введите код из SMS</h1><p id="otpPhoneLabel" class="muted"></p>
+    <div class="field"><label for="phoneOtp">Код подтверждения</label><input id="phoneOtp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required placeholder="123456"></div>
+    <button class="btn green" type="submit">Подтвердить и войти</button><p><button class="linkbtn" type="button" onclick="resendPhoneOtp()">Отправить код повторно</button> · <button class="linkbtn" type="button" onclick="cancelPhoneOtp()">Изменить номер</button></p>
+  </form>
   <form id="forgotForm" class="hidden" onsubmit="event.preventDefault();sendPasswordReset()">
     <div class="eyebrow">ВОССТАНОВЛЕНИЕ ДОСТУПА</div><h1>Забыли пароль?</h1><p class="muted">Отправим письмо со ссылкой для создания нового пароля.</p>
     <div class="field"><label for="forgotEmail">Электронная почта</label><input id="forgotEmail" type="email" required autocomplete="email"></div>
@@ -101,6 +109,13 @@
 <main id="adminView" class="hidden">
   <section class="hero"><div class="eyebrow">АДМИНИСТРИРОВАНИЕ COACH LINK</div><h1>Панель администратора</h1><p>Создавай учётные записи тренеров и спортсменов и контролируй доступ.</p></section>
   <div class="grid">
+    <section class="card span12">
+      <h2>Привязать телефон администратора</h2>
+      <p class="small muted">После входа в существующий аккаунт администратора подтверди здесь его номер. Роль admin и все данные останутся у этого аккаунта.</p>
+      <form onsubmit="event.preventDefault();startAdminPhoneLink()"><div class="row"><div class="field"><label for="adminPhone">Мобильный телефон</label><input id="adminPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+380XXXXXXXXX" required></div><div class="field" style="align-self:end"><button class="btn" type="submit">Отправить код привязки</button></div></div></form>
+      <form id="adminPhoneVerifyForm" class="hidden" onsubmit="event.preventDefault();verifyAdminPhoneLink()"><div class="field"><label for="adminPhoneOtp">Код из SMS</label><input id="adminPhoneOtp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" minlength="6" maxlength="6" required></div><button class="btn green" type="submit">Подтвердить номер администратора</button></form>
+      <p id="adminPhoneMessage" class="small" aria-live="polite"></p>
+    </section>
     <section class="card span5">
       <h2>Создать аккаунт</h2>
       <form id="adminCreateForm" onsubmit="event.preventDefault();createManagedUser()">
@@ -143,17 +158,64 @@ function show(view){['authView','loadingView','pendingView','coachView','athlete
 
 let authBusy=false;
 function showAuthPanel(panel){
-  ['authMainPanel','forgotForm','recoveryForm'].forEach(id=>$(id).classList.toggle('hidden',id!==(panel==='forgot'?'forgotForm':panel==='recovery'?'recoveryForm':'authMainPanel')));
-  $('loginForm').classList.toggle('hidden',panel!=='login');
-  $('registerForm').classList.toggle('hidden',panel!=='register');
-  $('loginTab').classList.toggle('active',panel==='login');
-  $('registerTab').classList.toggle('active',panel==='register');
+  ['authMainPanel','otpForm','forgotForm','recoveryForm'].forEach(id=>$(id).classList.toggle('hidden',id!==(panel==='otp'?'otpForm':panel==='forgot'?'forgotForm':panel==='recovery'?'recoveryForm':'authMainPanel')));
+  if($('authMainPanel')){$('loginForm').classList.toggle('hidden',panel!=='login');$('registerForm').classList.toggle('hidden',panel!=='register');$('loginTab').classList.toggle('active',panel==='login');$('registerTab').classList.toggle('active',panel==='register');}
   setMessage('');
 }
 window.showAuthPanel=showAuthPanel;
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 window.scrollToTop=scrollToTop;
+let pendingPhone='',pendingPhoneMode='login',adminPhonePending='';
+function normalizePhone(value){
+  const phone=String(value||'').replace(/[\s()-]/g,'');
+  if(!/^\+[1-9]\d{7,14}$/.test(phone))throw new Error('Укажи номер в международном формате, например +380XXXXXXXXX.');
+  return phone;
+}
+async function sendPhoneOtp(mode){
+  if(authBusy)return;authBusy=true;
+  try{
+    const phone=normalizePhone(mode==='register'?$('registerPhone').value:$('loginPhone').value);
+    if(mode==='register'&&$('registerName').value.trim().length<2)throw new Error('Укажи имя не короче двух символов.');
+    const options={shouldCreateUser:mode==='register'};
+    if(mode==='register')options.data={display_name:$('registerName').value.trim()};
+    const {error}=await supabase.auth.signInWithOtp({phone,options});
+    if(error)throw error;
+    pendingPhone=phone;pendingPhoneMode=mode;$('otpPhoneLabel').textContent='Код отправлен на '+phone;showAuthPanel('otp');setMessage('SMS отправлено. Введи шестизначный код.');
+  }catch(e){setMessage(e.message||'Не удалось отправить SMS',true)}
+  finally{authBusy=false}
+}
+window.sendPhoneOtp=sendPhoneOtp;
+async function verifyPhoneOtp(){
+  if(authBusy)return;authBusy=true;
+  try{
+    const token=$('phoneOtp').value.trim();if(!/^\d{6}$/.test(token))throw new Error('Введи шестизначный код из SMS.');
+    const {data,error}=await supabase.auth.verifyOtp({phone:pendingPhone,token,type:'sms'});if(error)throw error;
+    currentUser=data.user;pendingPhone='';$('phoneOtp').value='';await loadProfile();
+  }catch(e){setMessage(e.message||'Код не подошёл',true)}
+  finally{authBusy=false}
+}
+window.verifyPhoneOtp=verifyPhoneOtp;
+async function resendPhoneOtp(){
+  if(!pendingPhone){showAuthPanel('login');return}if(authBusy)return;authBusy=true;
+  try{const options={shouldCreateUser:pendingPhoneMode==='register'};if(pendingPhoneMode==='register')options.data={display_name:$('registerName').value.trim()};const {error}=await supabase.auth.signInWithOtp({phone:pendingPhone,options});if(error)throw error;setMessage('Новый код отправлен.')}
+  catch(e){setMessage(e.message||'Не удалось отправить SMS',true)}finally{authBusy=false}
+}
+window.resendPhoneOtp=resendPhoneOtp;
+function cancelPhoneOtp(){pendingPhone='';$('phoneOtp').value='';showAuthPanel(pendingPhoneMode)}
+window.cancelPhoneOtp=cancelPhoneOtp;
+async function startAdminPhoneLink(){
+  const message=$('adminPhoneMessage');message.textContent='';
+  try{const phone=normalizePhone($('adminPhone').value);const {error}=await supabase.auth.updateUser({phone});if(error)throw error;adminPhonePending=phone;$('adminPhoneVerifyForm').classList.remove('hidden');message.textContent='Код отправлен. Подтверди номер для текущего аккаунта.'}
+  catch(e){message.textContent=e.message||'Не удалось отправить код';message.className='small error'}
+}
+window.startAdminPhoneLink=startAdminPhoneLink;
+async function verifyAdminPhoneLink(){
+  const message=$('adminPhoneMessage');
+  try{const token=$('adminPhoneOtp').value.trim();const {error}=await supabase.auth.verifyOtp({phone:adminPhonePending,token,type:'phone_change'});if(error)throw error;message.textContent='Номер подтверждён и привязан к текущему аккаунту администратора.';message.className='small success';$('adminPhoneVerifyForm').classList.add('hidden');$('adminPhone').value='';$('adminPhoneOtp').value='';adminPhonePending=''}
+  catch(e){message.textContent=e.message||'Не удалось подтвердить номер';message.className='small error'}
+}
+window.verifyAdminPhoneLink=verifyAdminPhoneLink;
 async function login(){
   if(authBusy)return;authBusy=true;
   try{
@@ -367,7 +429,7 @@ async function loadAdminUsers(){
   const {data,error}=await supabase.functions.invoke('admin-users',{body:{action:'list'}});
   if(error){$('adminUsers').innerHTML='<div class="empty error">Не удалось загрузить список: '+esc(error.message)+'</div>';return}
   const users=data?.users||[];
-  $('adminUsers').innerHTML=users.map(u=>'<div class="item"><div><strong>'+esc(u.display_name||'Без имени')+'</strong><span class="small">'+esc(u.email||'')+'</span><span class="small">'+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[u.role]||'Без роли')+' · '+(u.email_confirmed?'Почта подтверждена':'Почта не подтверждена')+'</span></div><span class="tag">'+esc(u.role)+'</span></div>').join('')||'<div class="empty">Пользователей пока нет.</div>';
+  $('adminUsers').innerHTML=users.map(u=>'<div class="item"><div><strong>'+esc(u.display_name||'Без имени')+'</strong><span class="small">'+esc(u.phone||u.email||'')+'</span><span class="small">'+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[u.role]||'Без роли')+' · '+(u.email_confirmed?'Почта подтверждена':'Почта не подтверждена')+'</span></div><span class="tag">'+esc(u.role)+'</span></div>').join('')||'<div class="empty">Пользователей пока нет.</div>';
 }
 window.loadAdminUsers=loadAdminUsers;
 async function createManagedUser(){
