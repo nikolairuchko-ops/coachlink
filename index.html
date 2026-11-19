@@ -126,6 +126,9 @@ async function signUp(){
   if(data.session){currentUser=data.user;await loadProfile()}
   else{setMessage('Аккаунт создан. Проверь почту и подтверди адрес, затем войди. Новая роль — «Спортсмен».')}
 }
+window.signIn=signIn;
+window.signUp=signUp;
+
 async function signOut(){
   await supabase.auth.signOut();
   currentUser=null;profile=null;athletes=[];
