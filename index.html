@@ -41,7 +41,7 @@
       </form>
     </details>
     <button class="btn secondary" type="button" onclick="startQrLogin()">Войти по QR-коду с телефона</button>
-    <div id="phoneQrApproval" class="notice hidden">Этот запрос на вход в COACH LINK создан на другом устройстве. Войдите на телефоне и подтвердите вход.</div>
+    <div id="phoneQrApproval" class="notice hidden" aria-live="polite"></div>
   </div>
   <form id="otpForm" class="hidden" onsubmit="event.preventDefault();verifyPhoneOtp()">
     <div class="eyebrow">ПОДТВЕРЖДЕНИЕ НОМЕРА</div><h1>Введите код из SMS</h1><p id="otpPhoneLabel" class="muted"></p>
@@ -377,7 +377,10 @@ async function loadProfile(){
   }
   $('userLabel').textContent=profile.display_name+' · '+({admin:'Администратор',coach:'Тренер',athlete:'Спортсмен'}[profile.role]);
   await renderDashboard();
-  if(qrPendingApproval)await approveQrLogin();
+  if(qrPendingApproval){
+    $('phoneQrApproval').innerHTML='Запрос на вход в COACH LINK с компьютера. Убедись, что это твой компьютер, и только затем подтверди вход.<br><button class="btn green" type="button" style="margin-top:10px" onclick="approveQrLogin()">Подтвердить вход на компьютере</button>';
+    $('phoneQrApproval').classList.remove('hidden');
+  }
 }
 async function guardRoute(){
   if(!currentUser){show('authView');return}
@@ -551,8 +554,8 @@ async function handleAuthChange(event,session){
     if(qrPendingApproval){
       if(!qrPendingApproval.id||!qrPendingApproval.challenge||!qrPendingApproval.public_key)throw new Error('QR-ссылка повреждена.');
       $('phoneQrApproval').classList.remove('hidden');
-      if(currentUser&&!currentUser.is_anonymous){$('phoneQrApproval').textContent='Подтверждаем вход на компьютере…';}
-      else{$('phoneQrApproval').textContent='Войди по SMS на этом телефоне, чтобы подтвердить вход на компьютере.';}
+      if(currentUser&&!currentUser.is_anonymous){$('phoneQrApproval').textContent='Проверяем аккаунт. После загрузки профиля появится кнопка подтверждения.';}
+      else{$('phoneQrApproval').textContent='Войди по SMS на этом телефоне, чтобы подтвердить запрос на вход.';}
     }
     if(currentUser?.is_anonymous){
       await supabase.auth.signOut();
