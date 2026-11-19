@@ -175,9 +175,12 @@ function clShowAthlete(id){
 }
 function clSelectAthlete(id){clActiveAthleteId=id;clSaveRoster();render();}
 function clCreateTaskForSelected(){
- const a=clAthletes.find(x=>x.id===$('targetAthlete').value);if(!a){msg('Сначала добавьте спортсмена');return;}
- const before=tasks.length;clPreviousCreateTask();
- if(tasks.length>before){tasks[0].athleteId=a.id;tasks[0].athlete=clFullName(a);save();render();}
+ const a=clAthletes.find(x=>x.id===$('targetAthlete').value);
+ const name=$('taskName').value.trim(),sets=+$('sets').value,reps=+$('reps').value,rest=+$('rest').value,mode=$('taskMode')?.value||'reps',duration=+$('duration')?.value||30;
+ if(!a){msg('Сначала добавьте спортсмена');return;}
+ if(!name||!Number.isInteger(sets)||sets<1||sets>20||!Number.isInteger(reps)||reps<1||reps>200||!Number.isFinite(rest)||rest<0||rest>900||(mode==='time'&&(!Number.isInteger(duration)||duration<5||duration>3600))){msg('Проверьте параметры задания');return;}
+ tasks.unshift({id:Date.now(),athleteId:a.id,athlete:clFullName(a),name,sets,reps,rest,mode,duration,instructions:$('instructions').value.trim(),video:$('video').value.trim(),status:'new',setNow:1,elapsed:0,report:'',setResults:[],reviewStatus:'not_submitted'});
+ save();render();msg('Задание назначено: '+clFullName(a));
 }
 const clPreviousCreateTask=createTask;
 createTask=clCreateTaskForSelected;
@@ -187,7 +190,7 @@ render=function(){
  const a=clAthletes.find(x=>x.id===clActiveAthleteId);
  if(a){
   const mine=tasks.filter(t=>t.athleteId===a.id),done=mine.filter(t=>t.status==='done'||t.reviewStatus==='approved').length;
-  if($('myDone'))$('myDone').textContent=done;
+  if($('athleteCount'))$('athleteCount').textContent=clAthletes.length;\n  if($('myDone'))$('myDone').textContent=done;
   if($('myActive'))$('myActive').textContent=mine.length-done;
   if($('myProgress'))$('myProgress').style.width=(mine.length?done/mine.length*100:0)+'%';
   if($('progressText'))$('progressText').textContent=mine.length?'Завершено '+done+' из '+mine.length+' заданий.':'Пока нет назначенных заданий.';
