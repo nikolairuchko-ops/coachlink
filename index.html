@@ -35,8 +35,18 @@
     <button class="btn" type="submit">Войти</button>
   </form>
   <button class="btn secondary" type="button" onclick="resetLoginPassword()">Забыли пароль? Отправить ссылку для сброса</button>
+  <button class="btn secondary" type="button" onclick="showRegisterForm()">Создать аккаунт спортсмена</button>
+  <form id="registerForm" class="hidden" onsubmit="event.preventDefault();signUp()">
+    <h2>Регистрация спортсмена</h2>
+    <div class="field"><label for="registerName">Имя и фамилия</label><input id="registerName" type="text" maxlength="100" autocomplete="name" required></div>
+    <div class="field"><label for="registerEmail">Электронная почта</label><input id="registerEmail" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="registerPassword">Пароль (не менее 8 символов)</label><input id="registerPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+    <div class="field"><label for="registerPasswordConfirm">Повтори пароль</label><input id="registerPasswordConfirm" type="password" minlength="8" autocomplete="new-password" required></div>
+    <button class="btn green" type="submit">Зарегистрироваться</button>
+    <button class="btn secondary" type="button" onclick="showLoginForm()">Назад ко входу</button>
+  </form>
   <p id="authMessage" class="small" aria-live="polite"></p>
-  <p class="small">Регистрация на сайте отключена. Учётные записи создаёт администратор, а роль назначается в системе. Доступ защищён Supabase.</p>
+  <p class="small">Самостоятельная регистрация открыта для спортсменов. Аккаунты тренеров и администраторов создаются администратором.</p>
 </section>
 
 <section id="loadingView" class="card hidden"><h2>Проверяем доступ…</h2><p class="muted">Получаем профиль и роль из Supabase.</p></section>
@@ -146,6 +156,43 @@ async function signIn(){
   if(error){enforceLoginRole=false;setMessage(error.message,true);return}
 }
 window.signIn=signIn;
+
+function showRegisterForm(){
+  $('loginForm').classList.add('hidden');
+  $('registerForm').classList.remove('hidden');
+  document.querySelector('#authView > button[onclick="resetLoginPassword()"]').classList.add('hidden');
+  document.querySelector('#authView > button[onclick="showRegisterForm()"]').classList.add('hidden');
+  setMessage('');
+}
+window.showRegisterForm=showRegisterForm;
+function showLoginForm(){
+  $('registerForm').classList.add('hidden');
+  $('loginForm').classList.remove('hidden');
+  document.querySelector('#authView > button[onclick="resetLoginPassword()"]').classList.remove('hidden');
+  document.querySelector('#authView > button[onclick="showRegisterForm()"]').classList.remove('hidden');
+  setMessage('');
+}
+window.showLoginForm=showLoginForm;
+async function signUp(){
+  const display_name=$('registerName').value.trim();
+  const email=$('registerEmail').value.trim().toLowerCase();
+  const password=$('registerPassword').value;
+  const confirm=$('registerPasswordConfirm').value;
+  if(!display_name||!email||password.length<8){setMessage('Заполни имя, корректную почту и пароль не короче 8 символов.',true);return}
+  if(password!==confirm){setMessage('Пароли не совпадают.',true);return}
+  setMessage('Создаём аккаунт спортсмена…');
+  const {data,error}=await supabase.auth.signUp({email,password,options:{data:{display_name}}});
+  if(error){setMessage(error.message,true);return}
+  $('registerForm').reset();
+  if(data.session){
+    setMessage('Аккаунт создан. Выполняем вход…');
+  }else{
+    setMessage('Регистрация почти завершена. Проверь почту '+email+' и подтверди адрес, затем войди.');
+    showLoginForm();
+    $('loginEmail').value=email;
+  }
+}
+window.signUp=signUp;
 
 async function resetLoginPassword(){
   const email=$('loginEmail').value.trim();
