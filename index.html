@@ -20,6 +20,44 @@
   <div id="userbar" class="userbar hidden"><span id="userLabel" class="small"></span><button class="btn secondary" type="button" onclick="scrollToTop()">Панель</button><button class="btn red" type="button" onclick="signOut()">Выйти</button></div>
 </header>
 
+<section id="publicHome">
+  <section class="hero card" style="padding:clamp(22px,5vw,48px);margin-top:8px;background:linear-gradient(125deg,#172d49,#14243a 55%,#183c50)">
+    <div class="eyebrow">ТРЕНИРОВКИ · МЕТОДИКА · РАЗВИТИЕ</div>
+    <h1 style="font-size:clamp(34px,7vw,58px);max-width:760px">Сильнее с каждой тренировкой.</h1>
+    <p style="font-size:17px;max-width:680px">COACH LINK — пространство для тренеров и спортсменов: гимнастика, эквилибр, физическая подготовка и осознанный прогресс.</p>
+    <div class="actions" style="margin-top:22px"><button class="btn green" type="button" onclick="openLogin()">Войти в личный кабинет</button><a class="btn secondary" href="#programs" style="text-decoration:none">Изучить разделы</a></div>
+  </section>
+  <nav class="card actions" aria-label="Навигация по сайту" style="margin:14px 0;position:sticky;top:8px;z-index:5">
+    <a class="linkbtn" href="#warmup">Разминка</a><a class="linkbtn" href="#balance">Эквилибр</a><a class="linkbtn" href="#strength">Сила и гибкость</a><a class="linkbtn" href="#method">Методика</a>
+  </nav>
+  <section id="programs" class="grid">
+    <article class="card span4"><div class="eyebrow">01 · ПОДГОТОВКА</div><h2>Разминка и мобильность</h2><p class="muted">Подготовь суставы, мышцы и нервную систему к нагрузке. Начинай спокойно и повышай интенсивность постепенно.</p><a class="linkbtn" href="#warmup">Открыть раздел ↓</a></article>
+    <article class="card span4"><div class="eyebrow">02 · КООРДИНАЦИЯ</div><h2>Эквилибр и баланс</h2><p class="muted">Контроль положения тела, устойчивость, работа стопы и развитие чувства равновесия.</p><a class="linkbtn" href="#balance">Открыть раздел ↓</a></article>
+    <article class="card span4"><div class="eyebrow">03 · ФИЗИЧЕСКАЯ ФОРМА</div><h2>Сила и гибкость</h2><p class="muted">Базовая силовая подготовка, активная гибкость и безопасное развитие амплитуды.</p><a class="linkbtn" href="#strength">Открыть раздел ↓</a></article>
+    <article id="warmup" class="card span6"><div class="eyebrow">РАЗДЕЛ 01</div><h2>Разминка перед тренировкой</h2><div class="list">
+      <div class="item"><div><strong>Общий разогрев · 5–7 минут</strong><span class="small">Лёгкий бег на месте, шаги, приставные перемещения, мягкие прыжки.</span></div></div>
+      <div class="item"><div><strong>Мобильность · 4–6 минут</strong><span class="small">Круговые движения плечами и тазом, сгибание-разгибание голеностопа, динамические выпады.</span></div></div>
+      <div class="item"><div><strong>Специальная подготовка · 3–5 минут</strong><span class="small">Упрощённые элементы и движения, которые встретятся в основной части занятия.</span></div></div>
+    </div><p class="notice">Разминка не должна вызывать боль. Сложные элементы выполняй только после достаточной подготовки и под контролем тренера.</p></article>
+    <article id="balance" class="card span6"><div class="eyebrow">РАЗДЕЛ 02</div><h2>Эквилибр и равновесие</h2><div class="list">
+      <div class="item"><div><strong>Стойка на одной ноге</strong><span class="small">3 подхода по 20–30 секунд на каждую сторону. Сохраняй ровное положение таза.</span></div></div>
+      <div class="item"><div><strong>Линия и контроль корпуса</strong><span class="small">Ходьба по линии вперёд и назад, 3 прохода. Смотри перед собой, не торопись.</span></div></div>
+      <div class="item"><div><strong>Перенос центра тяжести</strong><span class="small">Медленные переносы веса с ноги на ногу, 2–3 подхода по 8 повторений.</span></div></div>
+    </div><p class="muted small">Усложняй упражнения постепенно: сначала устойчивое положение, затем движение рук и только потом — более сложные варианты.</p></article>
+    <article id="strength" class="card span6"><div class="eyebrow">РАЗДЕЛ 03</div><h2>Сила и гибкость</h2><div class="list">
+      <div class="item"><div><strong>Планка</strong><span class="small">3 × 15–30 секунд. Держи корпус прямым, не прогибай поясницу.</span></div></div>
+      <div class="item"><div><strong>Приседания с собственным весом</strong><span class="small">2–3 × 8–12 повторений. Колени направлены по линии носков.</span></div></div>
+      <div class="item"><div><strong>Активная гибкость</strong><span class="small">Контролируемые махи и подъёмы ног в комфортной амплитуде, без рывков.</span></div></div>
+    </div><p class="notice">Не выполняй растяжку через резкую боль и не используй партнёра для силового продавливания амплитуды.</p></article>
+    <article id="method" class="card span6"><div class="eyebrow">РАЗДЕЛ 04</div><h2>Методика тренировки</h2><div class="list">
+      <div class="item"><div><strong>1. Цель занятия</strong><span class="small">Выбери один главный навык и 1–2 вспомогательные задачи.</span></div></div>
+      <div class="item"><div><strong>2. Прогрессия</strong><span class="small">От простого к сложному: сначала техника и контроль, затем объём и скорость.</span></div></div>
+      <div class="item"><div><strong>3. Обратная связь</strong><span class="small">Записывай результат, отмечай качество выполнения и планируй следующий шаг.</span></div></div>
+    </div><p class="muted small">COACH LINK помогает тренеру назначать задания, отслеживать навыки и делиться новостями с командой.</p></article>
+    <section class="card span12" style="text-align:center;padding:28px"><div class="eyebrow">ТВОЯ КОМАНДА · ТВОЙ ПРОГРЕСС</div><h2 style="font-size:24px">Готов продолжить?</h2><p class="muted">Войди, чтобы открыть персональную панель тренера, спортсмена или администратора.</p><button class="btn green" type="button" onclick="openLogin()">Перейти к входу</button></section>
+  </section>
+</section>
+
 <section id="authView" class="card auth hidden">
   <div id="authMainPanel">
     <div class="eyebrow">COACH LINK · ЛИЧНЫЙ КАБИНЕТ</div><h1>Вход по номеру телефона</h1><p class="muted">Получите одноразовый код по SMS. Пароль не нужен.</p>
@@ -161,7 +199,7 @@ const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateText = value => value ? new Date(value).toLocaleDateString('ru-RU') : '';
 function toast(message){$('toast').textContent=message;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),2600)}
-function show(view){['authView','qrApproveView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);}
+function show(view){['publicHome','authView','qrApproveView','loadingView','pendingView','coachView','athleteView','adminView'].forEach(id=>$(id).classList.toggle('hidden',id!==view));$('userbar').classList.toggle('hidden',!currentUser);}
 
 let authBusy=false;
 function showAuthPanel(panel){
@@ -170,6 +208,8 @@ function showAuthPanel(panel){
   setMessage('');
 }
 window.showAuthPanel=showAuthPanel;
+function openLogin(){show('authView');showAuthPanel('login');scrollToTop()}
+window.openLogin=openLogin;
 function setMessage(message,error=false){$('authMessage').textContent=message;$('authMessage').className='small '+(error?'error':'success')}
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 window.scrollToTop=scrollToTop;
@@ -352,7 +392,7 @@ window.saveNewPassword=saveNewPassword;
 async function signOut(){
   const {error}=await supabase.auth.signOut();
   if(error){toast('Не удалось выйти: '+error.message);return}
-  currentUser=null;profile=null;show('authView');showAuthPanel('login');
+  currentUser=null;profile=null;show('publicHome');
 }
 window.signOut=signOut;
 
@@ -534,7 +574,7 @@ window.createManagedUser=createManagedUser;
 async function handleAuthChange(event,session){
   currentUser=session?.user||null;
   if(event==='PASSWORD_RECOVERY'){show('authView');showAuthPanel('recovery');return}
-  if(event==='SIGNED_OUT'){profile=null;show('authView');showAuthPanel('login');return}
+  if(event==='SIGNED_OUT'){profile=null;show('publicHome');return}
   if(currentUser&&!currentUser.is_anonymous&&(!profile||event==='SIGNED_IN'||event==='INITIAL_SESSION'))await loadProfile();
 }
 (async()=>{
@@ -562,7 +602,8 @@ async function handleAuthChange(event,session){
     if(currentUser)await loadProfile();
     else{
       const recovery=location.hash.includes('type=recovery');
-      show('authView');showAuthPanel(recovery?'recovery':'login');
+      if(recovery){show('authView');showAuthPanel('recovery')}
+      else show('publicHome');
     }
   }catch(startupError){
     console.error('COACH LINK startup error:',startupError);
