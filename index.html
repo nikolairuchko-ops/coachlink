@@ -13,7 +13,7 @@
 <section class="hero"><div><div class="eyebrow">ЕДИНАЯ СИСТЕМА ТРЕНИРОВОК</div><h1 id="pageTitle">Панель тренера</h1><p id="pageSub">Назначайте упражнения, следите за прогрессом и общайтесь со спортсменами.</p></div><span class="pill" id="connection">● Демо-режим · локальные данные</span></section>
 <main id="coachView">
 <div class="grid">
-<section class="card span8"><h2>Обзор команды</h2><div class="statrow"><div class="stat"><span class="small">Спортсмены</span><b id="athleteCount">3</b></div><div class="stat"><span class="small">Активные задания</span><b id="activeCount">2</b></div><div class="stat"><span class="small">Завершено сегодня</span><b id="doneCount">1</b></div></div><div style="height:14px"></div><div class="row" style="align-items:end;flex-wrap:wrap"><div class="field" style="flex:1;min-width:180px"><label>Поиск спортсмена</label><input id="athleteSearch" placeholder="Имя или фамилия" oninput="clRenderRoster()"></div><div class="field" style="flex:1;min-width:140px"><label>Имя</label><input id="newAthleteFirst" placeholder="Например, Иван"></div><div class="field" style="flex:1;min-width:140px"><label>Фамилия</label><input id="newAthleteLast" placeholder="Например, Петренко"></div><div class="field" style="align-self:end"><button class="btn green" onclick="clAddAthlete()">＋ Добавить</button></div></div><div id="athleteList" class="list"></div></section>
+<section class="card span8"><h2>Обзор команды</h2><div class="statrow"><div class="stat"><span class="small">Спортсмены</span><b id="athleteCount">3</b></div><div class="stat"><span class="small">Активные задания</span><b id="activeCount">2</b></div><div class="stat"><span class="small">Завершено сегодня</span><b id="doneCount">1</b></div></div><div style="height:14px"></div><h3>Спортсмены</h3><div id="athleteList" class="list"></div></section>
 <section class="card span4"><h2>Пригласить спортсмена</h2><p class="muted small">Подключение по коду приглашения. В демо используется локальная связка кабинетов.</p><div class="field"><label>Код приглашения</label><input id="inviteCode" value="COACH-2481" readonly></div><button class="btn secondary" onclick="copyInvite()">Копировать код</button><div class="notice" style="margin-top:12px">В реальной версии приглашения будут работать через серверную авторизацию.</div></section>
 <section class="card span7"><h2>Конструктор задания</h2><div class="row"><div class="field"><label>Спортсмен</label><select id="targetAthlete"><option>Алексей</option><option>Мария</option><option>Денис</option></select></div><div class="field"><label>Название упражнения</label><input id="taskName" value="Приседания"></div></div><div class="row"><div class="field"><label>Подходы</label><input id="sets" type="number" min="1" max="20" value="3"></div><div class="field"><label>Повторения</label><input id="reps" type="number" min="1" max="200" value="15"></div><div class="field"><label>Отдых, сек.</label><input id="rest" type="number" min="0" max="900" value="60"></div></div><div class="field"><label>Правила и рекомендации</label><textarea id="instructions">Держи спину ровно, колени направляй по линии носков. Выполняй движение плавно, без рывков.</textarea></div><div class="row"><div class="field"><label>Тип нагрузки</label><select id="taskMode"><option value="reps">Повторения</option><option value="time">На время</option></select></div><div class="field"><label>Длительность подхода, сек.</label><input id="duration" type="number" min="5" max="3600" value="30"></div></div><div class="field"><label>Ссылка на видео (необязательно)</label><input id="video" placeholder="https://..."></div><button class="btn" onclick="createTask()">＋ Отправить задание спортсмену</button></section>
 <section class="card span5"><h2>Задания и отчёты</h2><div id="coachTasks" class="list"></div></section>
@@ -21,7 +21,7 @@
 </div></main>
 <main id="athleteView" class="hidden">
 <div class="grid">
-<section class="card span8"><div class="row" style="align-items:center"><div><div class="eyebrow">ПЛАН НА СЕГОДНЯ</div><h2 style="margin:4px 0">Кабинет спортсмена</h2></div><span class="pill">Демо-переключение профиля</span></div><div class="field"><label>Выбрать спортсмена</label><select id="activeAthlete" onchange="clSelectAthlete(this.value)"></select></div><div id="athleteTasks" class="list"></div></section>
+<section class="card span8"><div class="row" style="align-items:center"><div><div class="eyebrow">ПЛАН НА СЕГОДНЯ</div><h2 style="margin:4px 0">Мои задания</h2></div><span class="pill">Тренер: Андрей</span></div><div id="athleteTasks" class="list"></div></section>
 <section class="card span4"><h2>Мой прогресс</h2><div class="statrow"><div class="stat"><span class="small">Выполнено</span><b id="myDone">0</b></div><div class="stat"><span class="small">В работе</span><b id="myActive">0</b></div></div><div class="progressbar"><i id="myProgress"></i></div><p class="small" id="progressText">Начни тренировку, чтобы увидеть прогресс.</p></section>
 <section class="card span12"><h2>Новости тренера</h2><div class="row" style="align-items:center"><p class="muted small">Подпишись, чтобы получать публикации и рекомендации тренера.</p><button id="subscribeBtn" class="btn secondary" onclick="toggleSubscribe()">＋ Подписаться</button></div><div id="athleteNews"></div></section>
 </div></main>
@@ -124,79 +124,5 @@ render=function(){
  $('athleteTasks').innerHTML=tasks.filter(t=>t.athlete==='Алексей').map(t=>{const r=t.reviewStatus||'not_submitted',label=r==='pending'?'На проверке':r==='approved'?'Принято тренером':r==='returned'?'Есть замечания':t.status==='progress'?'В процессе':'Новое';return '<div class="item"><div><strong>'+esc(t.name)+'</strong><span class="small">'+t.sets+' подхода · '+(t.mode==='time'?t.duration+' сек.':t.reps+' повторений')+' · '+(t.setResults||[]).length+'/'+t.sets+' зафиксировано</span><div style="margin-top:6px"><span class="tag '+(r==='approved'?'done':r==='pending'?'progress':r==='returned'?'rest':'')+'">'+label+'</span></div></div>'+(r==='approved'?'<span class="small">✓</span>':'<button class="btn" onclick="openTask('+t.id+')">'+(r==='pending'?'Открыть отчёт':r==='returned'?'Доработать':'Продолжить')+'</button>')+'</div>';}).join('')||'<p class="muted">Тренер пока не назначил задания.</p>';
 };
 render();
-
-
-/* Roster: individual athlete identities for the prototype */
-let clAthletes = JSON.parse(localStorage.getItem('cl_athletes') || 'null') || [
- {id:'demo-alex',firstName:'Алексей',lastName:'Иванов'},
- {id:'demo-maria',firstName:'Мария',lastName:'Коваленко'},
- {id:'demo-denis',firstName:'Денис',lastName:'Шевченко'}
-];
-let clActiveAthleteId = localStorage.getItem('cl_active_athlete') || (clAthletes[0]?.id || '');
-function clFullName(a){return [a.firstName,a.lastName].filter(Boolean).join(' ');}
-function clSaveRoster(){localStorage.setItem('cl_athletes',JSON.stringify(clAthletes));localStorage.setItem('cl_active_athlete',clActiveAthleteId);}
-function clEnsureTaskIds(){
- tasks.forEach(t=>{
-  if(!t.athleteId){
-   let a=clAthletes.find(x=>clFullName(x)===t.athlete || x.firstName===t.athlete);
-   if(!a){a={id:'legacy-'+String(t.id),firstName:String(t.athlete||'Спортсмен'),lastName:''};clAthletes.push(a);}
-   t.athleteId=a.id;
-  }
-  const a=clAthletes.find(x=>x.id===t.athleteId);
-  if(a)t.athlete=clFullName(a);
- });
-}
-function clAddAthlete(){
- const first=$('newAthleteFirst').value.trim(),last=$('newAthleteLast').value.trim();
- if(!first||!last){msg('Укажите имя и фамилию спортсмена');return;}
- if(clAthletes.some(a=>clFullName(a).toLocaleLowerCase()=== (first+' '+last).toLocaleLowerCase())){msg('Такой спортсмен уже есть в списке');return;}
- const a={id:'ath-'+Date.now().toString(36),firstName:first,lastName:last};
- clAthletes.push(a);clActiveAthleteId=a.id;clSaveRoster();$('newAthleteFirst').value='';$('newAthleteLast').value='';clRenderRoster();clRenderAthletePicker();render();msg('Спортсмен '+clFullName(a)+' добавлен');
-}
-function clRenderAthletePicker(){
- const select=$('targetAthlete'),active=$('activeAthlete');
- if(select){const old=select.value;select.innerHTML=clAthletes.map(a=>'<option value="'+esc(a.id)+'">'+esc(clFullName(a))+'</option>').join('');if(clAthletes.some(a=>a.id===old))select.value=old;}
- if(active){active.innerHTML=clAthletes.map(a=>'<option value="'+esc(a.id)+'">'+esc(clFullName(a))+'</option>').join('');if(clAthletes.some(a=>a.id===clActiveAthleteId))active.value=clActiveAthleteId;else if(clAthletes[0]){clActiveAthleteId=clAthletes[0].id;active.value=clActiveAthleteId;}}
-}
-function clRenderRoster(){
- const host=$('athleteList');if(!host)return;clEnsureTaskIds();
- const q=($('athleteSearch')?.value||'').trim().toLocaleLowerCase();
- const filtered=clAthletes.filter(a=>clFullName(a).toLocaleLowerCase().includes(q));
- host.innerHTML=filtered.map(a=>{
-  const own=tasks.filter(t=>t.athleteId===a.id),done=own.filter(t=>t.status==='done'||t.reviewStatus==='approved').length;
-  return '<div class="item"><div><strong>'+esc(clFullName(a))+'</strong><span class="small">'+own.length+' заданий · '+done+' завершено</span></div><div class="actions"><span class="tag">'+(own.length?Math.round(done/own.length*100)+'%':'Новый профиль')+'</span><button class="btn secondary" onclick="clShowAthlete(\''+a.id+'\')">Карточка</button></div></div>';
- }).join('')||'<p class="muted">Спортсмены не найдены. Добавьте нового участника выше.</p>';
-}
-function clShowAthlete(id){
- const a=clAthletes.find(x=>x.id===id);if(!a)return;const own=tasks.filter(t=>t.athleteId===id);
- const modal=document.createElement('div');modal.id='athleteCardModal';modal.style.cssText='position:fixed;inset:0;background:#050b15ed;z-index:12;display:grid;place-items:center;padding:14px';
- modal.innerHTML='<div class="card" style="width:min(560px,100%);max-height:90vh;overflow:auto"><div class="row" style="align-items:center"><div><div class="eyebrow">ЛИЧНАЯ КАРТОЧКА</div><h2 style="margin:4px 0">'+esc(clFullName(a))+'</h2></div><button class="btn secondary" onclick="document.getElementById(\'athleteCardModal\').remove()">Закрыть</button></div><div class="statrow"><div class="stat"><span class="small">Всего заданий</span><b>'+own.length+'</b></div><div class="stat"><span class="small">Завершено</span><b>'+own.filter(t=>t.status==='done'||t.reviewStatus==='approved').length+'</b></div><div class="stat"><span class="small">В работе</span><b>'+own.filter(t=>t.status!=='done'&&t.reviewStatus!=='approved').length+'</b></div></div><h3 style="margin-top:16px">История заданий</h3>'+ (own.map(t=>'<div class="item"><div><strong>'+esc(t.name)+'</strong><span class="small">'+t.sets+' подхода · '+(t.setResults||[]).length+' записано</span></div>'+clStatus(t)+'</div>').join('')||'<p class="muted">У этого спортсмена пока нет заданий.</p>')+'</div>';
- document.body.appendChild(modal);
-}
-function clSelectAthlete(id){clActiveAthleteId=id;clSaveRoster();render();}
-function clCreateTaskForSelected(){
- const a=clAthletes.find(x=>x.id===$('targetAthlete').value);
- const name=$('taskName').value.trim(),sets=+$('sets').value,reps=+$('reps').value,rest=+$('rest').value,mode=$('taskMode')?.value||'reps',duration=+$('duration')?.value||30;
- if(!a){msg('Сначала добавьте спортсмена');return;}
- if(!name||!Number.isInteger(sets)||sets<1||sets>20||!Number.isInteger(reps)||reps<1||reps>200||!Number.isFinite(rest)||rest<0||rest>900||(mode==='time'&&(!Number.isInteger(duration)||duration<5||duration>3600))){msg('Проверьте параметры задания');return;}
- tasks.unshift({id:Date.now(),athleteId:a.id,athlete:clFullName(a),name,sets,reps,rest,mode,duration,instructions:$('instructions').value.trim(),video:$('video').value.trim(),status:'new',setNow:1,elapsed:0,report:'',setResults:[],reviewStatus:'not_submitted'});
- save();render();msg('Задание назначено: '+clFullName(a));
-}
-const clPreviousCreateTask=createTask;
-createTask=clCreateTaskForSelected;
-const clPreviousFinalRender=render;
-render=function(){
- clEnsureTaskIds();clPreviousFinalRender();clRenderAthletePicker();clRenderRoster();
- const a=clAthletes.find(x=>x.id===clActiveAthleteId);
- if(a){
-  const mine=tasks.filter(t=>t.athleteId===a.id),done=mine.filter(t=>t.status==='done'||t.reviewStatus==='approved').length;
-  if($('athleteCount'))$('athleteCount').textContent=clAthletes.length;\n  if($('myDone'))$('myDone').textContent=done;
-  if($('myActive'))$('myActive').textContent=mine.length-done;
-  if($('myProgress'))$('myProgress').style.width=(mine.length?done/mine.length*100:0)+'%';
-  if($('progressText'))$('progressText').textContent=mine.length?'Завершено '+done+' из '+mine.length+' заданий.':'Пока нет назначенных заданий.';
-  if($('athleteTasks'))$('athleteTasks').innerHTML=mine.map(t=>{const r=t.reviewStatus||'not_submitted',label=r==='pending'?'На проверке':r==='approved'?'Принято тренером':r==='returned'?'Есть замечания':t.status==='progress'?'В процессе':'Новое';return '<div class="item"><div><strong>'+esc(t.name)+'</strong><span class="small">'+t.sets+' подхода · '+(t.mode==='time'?t.duration+' сек.':t.reps+' повторений')+' · '+(t.setResults||[]).length+'/'+t.sets+' зафиксировано</span><div style="margin-top:6px"><span class="tag '+(r==='approved'?'done':r==='pending'?'progress':r==='returned'?'rest':'')+'">'+label+'</span></div></div>'+(r==='approved'?'<span class="small">✓</span>':'<button class="btn" onclick="openTask('+t.id+')">'+(r==='pending'?'Открыть отчёт':r==='returned'?'Доработать':'Продолжить')+'</button>')+'</div>';}).join('')||'<p class="muted">Тренер пока не назначил задания этому спортсмену.</p>';
- }
-};
-clEnsureTaskIds();clSaveRoster();render();
 
 </script></body></html>
