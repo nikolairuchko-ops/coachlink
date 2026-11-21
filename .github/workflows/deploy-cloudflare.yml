@@ -1,0 +1,31 @@
+name: Deploy COACH LINK 2.0 to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - release/coach-link-4-validated
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Prepare static site
+        run: |
+          mkdir -p public
+          cp index.html public/index.html
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: deploy

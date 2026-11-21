@@ -1,0 +1,36 @@
+name: Validate COACH LINK 2.0
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, release/coach-link-4, release/coach-link-4-validated]
+jobs:
+  html-and-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Check inline JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          import pathlib, re
+          source = pathlib.Path("index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script\\s*>", source, re.I)
+          inline = [s for s in scripts if s.strip()]
+          if not inline:
+              raise SystemExit("No inline JavaScript found")
+          for i, script in enumerate(inline, 1):
+              pathlib.Path(f"/tmp/coach-link-{i}.js").write_text(script, encoding="utf-8")
+          print(f"Extracted {len(inline)} inline script block(s)")
+          PY
+          for file in /tmp/coach-link-*.js; do node --check "$file"; done
+      - name: Verify COACH LINK 2.0 modules
+        run: |
+          grep -q "function openAthlete" index.html
+          grep -q "function openTask" index.html
+          grep -q "function calendar" index.html
+          grep -q "function library" index.html
+          grep -q "function exportData" index.html
+          echo "COACH LINK 2.0 modules found"
