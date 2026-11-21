@@ -5,17 +5,20 @@ Mobile-first cloud platform for coaches and athletes. Built as a static HTML app
 ## Included
 - Separate coach and athlete login flows.
 - Signup always creates an athlete profile. Coach privileges must be granted by an administrator.
-- Coach workspace: roster, invite code, training assignment, athlete reports, skill records and team news.
+- Coach workspace: roster, invite code, training assignments, athlete reports, skill records and team news.
 - Athlete workspace: join a coach by invite code, view assignments, track sets/time, send progress reports and view skill records/news.
-- Manual athlete-name entry in the coach task builder; name must match a connected team member.
+- Manual athlete-name entry in the coach task builder; the entered name must match a connected team member.
 - Live synchronization for tasks, team links, requests, skill records and coach news.
 - Mobile navigation and responsive dark/cyber visual design.
 
 ## Supabase project
 - URL: https://gozakkwuwkylvcugtmps.supabase.co
 - Browser uses only the public publishable key. Never put a Supabase secret or service_role key in this repository.
-- Existing project schema includes profiles, coach_athletes, training_tasks, coach_news, news_subscriptions, skill_records, coach_athlete_requests, coach_public_profiles and QR login request infrastructure.
-- Migration `supabase/migrations/20261121210000_harden_profiles_and_realtime.sql` has been applied to the connected project.
+- Existing schema includes profiles, coach_athletes, training_tasks, coach_news, news_subscriptions, skill_records, coach_athlete_requests, coach_public_profiles and QR login request infrastructure.
+- Applied migrations:
+  - `20261121210000_harden_profile_roles_and_enable_team_realtime`
+  - `20261121214846_move_invite_lookup_to_private_schema`
+  - `20261121214930_add_query_indexes_and_consolidate_rls_policies`
 
 ## Deploy
 1. Serve `index.html` over HTTPS (GitHub Pages or another static host).
@@ -25,12 +28,12 @@ Mobile-first cloud platform for coaches and athletes. Built as a static HTML app
 5. Promote a trusted account to `coach` using the Supabase admin workflow, then assign a unique invite_code.
 6. The coach shares the code; the athlete signs in and enters it in the Team tab.
 
-## Important security notes
+## Security notes
 - Choosing the coach button at signup does not grant coach privileges.
-- The browser can update only `profiles.display_name`; role and invite_code are not client-editable.
+- Browser users can update only `profiles.display_name`; role and invite_code are not client-editable.
 - QR login request records are not directly exposed to anon/authenticated browser roles.
-- Invite-code joining is performed by the authenticated `join_coach_by_code` RPC. Its public wrapper runs as invoker; the privileged lookup is isolated in the non-exposed `private` schema and checks caller identity and athlete role.
-- RLS remains the source of truth for row-level access. UI visibility is not an authorization boundary.
+- Invite-code joining uses the authenticated `join_coach_by_code` RPC. Its public wrapper runs as invoker; privileged lookup is isolated in the non-exposed `private` schema and checks caller identity and athlete role.
+- RLS is the source of truth for row-level access. UI visibility is not an authorization boundary.
 
 ## Verification status
-The hardening migration was applied and verified against the connected Supabase project. Realtime publication includes coach_athletes, coach_athlete_requests, skill_records, training_tasks and coach_news. The web app was committed to the release branch. End-to-end testing with two real user accounts and final hosting/redirect configuration is still required before production launch.
+The three database migrations have been applied and verified. Profile update privileges were checked at column level. The privileged invite lookup is no longer in the exposed public schema. Realtime publication includes coach_athletes, coach_athlete_requests, skill_records, training_tasks and coach_news. End-to-end testing with two separate real accounts and final hosting/redirect configuration remains before production launch.
