@@ -1,0 +1,36 @@
+name: Validate COACH LINK
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, release/coach-link-4]
+
+jobs:
+  html-and-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check inline JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          import pathlib, re
+          source = pathlib.Path("index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script\s*>", source, re.I)
+          inline = [s for s in scripts if s.strip()]
+          if not inline:
+              raise SystemExit("No inline JavaScript found")
+          for i, script in enumerate(inline, 1):
+              pathlib.Path(f"/tmp/coach-link-{i}.js").write_text(script, encoding="utf-8")
+          print(f"Extracted {len(inline)} inline script block(s)")
+          PY
+          for file in /tmp/coach-link-*.js; do node --check "$file"; done
+      - name: Verify required app entry points
+        run: |
+          grep -q "function openApp" index.html
+          grep -q "function createTask" index.html
+          grep -q "function joinCoach" index.html
+          grep -q "subscribeLive" index.html
+          echo "COACH LINK app entry points found"
