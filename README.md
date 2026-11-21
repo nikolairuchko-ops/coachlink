@@ -29,7 +29,7 @@ Mobile-first cloud platform for coaches and athletes. Built as a static HTML app
 - Choosing the coach button at signup does not grant coach privileges.
 - The browser can update only `profiles.display_name`; role and invite_code are not client-editable.
 - QR login request records are not directly exposed to anon/authenticated browser roles.
-- Invite-code joining is performed by the authenticated RPC `join_coach_by_code`, which checks the caller identity and athlete role.
+- Invite-code joining is performed by the authenticated `join_coach_by_code` RPC. Its public wrapper runs as invoker; the privileged lookup is isolated in the non-exposed `private` schema and checks caller identity and athlete role.
 - RLS remains the source of truth for row-level access. UI visibility is not an authorization boundary.
 
 ## Verification status
